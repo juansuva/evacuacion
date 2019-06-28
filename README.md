@@ -18,7 +18,7 @@ las carpetas son necesarias para el correcto funcionamiento del algoritmo
 
 En esta carpeta se encuentra todas la entradas requeridas para el processo 
 
-#### alidas
+#### Salidas
 
 En esta carpeta se encuentran todos los reportes generados en el processo
 
