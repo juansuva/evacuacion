@@ -12,15 +12,17 @@ py -3 0.script.py
 
 ### ESTRUCTURA
 
-#####Entradas
+las carpetas son necesarias para el correcto funcionamiento del algoritmo
+
+#### Entradas
 
 En esta carpeta se encuentra todas la entradas requeridas para el processo 
 
-###Salidas
+#### alidas
 
 En esta carpeta se encuentran todos los reportes generados en el processo
 
-###Scripts
+#### Scripts
 
 En esta carpeta se encuentra cada uno de los scripts y tambien se encuentra la libreria necesaria para esta
 lib_process.py
