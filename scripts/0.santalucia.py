@@ -20,7 +20,7 @@ def get_laSantaLucia(orden,fecha,formatofecha):
     #se eliminan los descontinuados 
     da_santalucia=elimina_descontinuado(da_santalucia)
     #se obtienen concateado formato y cod de negocio
-    da_santalucia.to_excel("aver.xlsx")
+    
     
     da_santalucia=organiza_tq_santalucia2(da_santalucia)
     da_santalucia=set_concatenated_and_format(da_santalucia, "MAESTRA EL SALVADOR")
