@@ -409,42 +409,88 @@ def get_sanjose(orden,fecha,formatofecha):
     colocacion.to_excel("reportes_SAN_JOSE_valorizada.xlsx")
 
 
-def get_lacefa(orden,fecha,formatofecha):
-    da_cefa=get_data_all("0. Cefa.xlsx")
-    da_cefa=elimina_unidades(da_cefa)
-    da_cefa,nocode,c=set_tq_codes2(da_cefa,'Cefa','DEPOSITOS')
-    da_cefa=elimina_descontinuado(da_cefa)
-    da_cefa=set_concatenated_and_format(da_cefa, "MAESTRA EL SALVADOR")
-    da_cefa=set_concatenado_municipio(da_cefa)
-    da_cefa,gr=set_grupo(da_cefa)
-    da_cefa,no_price=set_price_nor(da_cefa,"Cefa","Lista de Precios Depósitos","DEPOSITOS")
-    consolidado=get_consolidated_report_depositos_su(da_cefa)
-    consolidado.reset_index(level=0, inplace=True)
-    consolidado.to_excel("CONSOLIDADO_CEFA.xlsx")
-    
-    extra_data_cefa = {            'ORDEN': orden, 'MES_ORDEN': fecha, 'FORMATO_FECHA': formatofecha, 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
-                              'COD_CANAL': 92,'CANAL': "92 Depositos", 'COD_CLIPADRE': 2850, 'REF_CLIENTE': "Cefa",
-                              'FLAG_CUA_BAS': ""
-                 }
-    coloca=get_form_report_NOR_depositos(consolidado,extra_data_cefa,"Cefa",0,0)
-    coloca.to_excel("reportes_cefa_valorizada.xlsx")
-    col=get_form_report_3_nor_depositos(consolidado,extra_data_cefa,0)
-    col.to_excel("reporte 3 cefa.xlsx")
-    
+
+#cargamos los datos del cliente
+da_cefa=get_data_all("0. Cefa.xlsx")
+#limpiamos unidades en (0)
+da_cefa=elimina_unidades(da_cefa)
+#obtenemos codigos tq
+da_cefa,nocode,c=set_tq_codes2(da_cefa,'Cefa','DEPOSITOS')
+#se eliminan los descontinuados 
+da_cefa=elimina_descontinuado(da_cefa)
+#se obtienen concateado formato y cod de negocio
+da_cefa=set_concatenated_and_format(da_cefa, "MAESTRA EL SALVADOR")
+#se obtiene el concatenado de municipio para obtener el grupo
+da_cefa=set_concatenado_municipio(da_cefa)
+#obtenermos el grupo de los pdv
+da_cefa,gr=set_grupo(da_cefa)
+#obtenemos precios
+da_cefa,no_price=set_price_nor(da_cefa,"Cefa","Lista de Precios Depósitos","DEPOSITOS")
+consolidado=get_consolidated_report_depositos_su(da_cefa)
+consolidado.reset_index(level=0, inplace=True)
+consolidado.to_excel("CONSOLIDADO_CEFA.xlsx")
+
+extra_data_cefa = {            'ORDEN': 91, 'MES_ORDEN': "Abr 2019", 'FORMATO_FECHA': "201904", 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
+                          'COD_CANAL': 92,'CANAL': "92 Depositos", 'COD_CLIPADRE': 2850, 'REF_CLIENTE': "Cefa",
+                          'FLAG_CUA_BAS': ""
+             }
+coloca=get_form_report_NOR_depositos(consolidado,extra_data_cefa,"Cefa",0,0)
+coloca.to_excel("reportes_cefa_valorizada.xlsx")
+col=get_form_report_3_nor_depositos(consolidado,extra_data_cefa,0)
+col.to_excel("reporte 3 cefa.xlsx")
+
+
+
+#cargamos los datos del cliente
+
+
 '''
-get_lacefa(91,"Abr 2019","201904")
-get_jheral(91,"Abr 2019","201904")
+#cargamos los datos del cliente
+da_americana=get_data_all("0. Americana.xlsx")
+#limpiamos unidades en (0)
+da_americana=elimina_unidades(da_americana)
+#obtenemos codigos tq
+da_americana,nocode=set_tq_code(da_americana,'Americana','DEPOSITOS')
+#se eliminan los descontinuados 
+da_americana=elimina_descontinuado(da_americana)
+#se obtienen concateado formato y cod de negocio
+da_americana=set_concatenated_and_format(da_americana, "MAESTRA EL SALVADOR")
+#se obtiene el concatenado de municipio para obtener el grupo
+da_americana=set_concatenado_municipio(da_americana)
+#obtenermos el grupo de los pdv
+da_americana,gr=set_grupo(da_americana)
+#obtenemos precios
+da_americana,no_price=set_price_nor(da_americana,"Americana","Lista de Precios Depósitos","DEPOSITOS")
+da_americana.PRECIO.fillna(0, inplace=True)
+consolidado=get_consolidated_report_depositos_su(da_americana)
+consolidado.reset_index(level=0, inplace=True)
+consolidado.to_excel("CONSOLIDADO_AMERICANA.xlsx")
+
+extra_data_cefa = {            'ORDEN': 91, 'MES_ORDEN':"Abr 2019", 'FORMATO_FECHA': "201904", 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
+                          'COD_CANAL': 92,'CANAL': "92 Depositos", 'COD_CLIPADRE': 2816, 'REF_CLIENTE': "Americana",
+                          'FLAG_CUA_BAS': ""
+             }
+#coloca=get_form_report_NOR_depositos(consolidado,extra_data_cefa,"Americana",0,0)
+#coloca.to_excel("reportes_americana_valorizada.xlsx")
+col=get_form_report_3_nor_depositos(consolidado,extra_data_cefa,0)
+col.to_excel("reporte 3 americana.xlsx")
+
+#get_americana(91,"Abr 2019","201904")
+    
+
+#get_lacefa(91,"Abr 2019","201904")
+#get_jheral(91,"Abr 2019","201904")
 #get_americas(89,"Feb 2019","201902")
-get_elaguila(91,"Abr 2019","201904")
-get_lasalud(91,"Abr 2019","201904")
-get_elpueblo(91,"Abr 2019","201904")
+#get_elaguila(91,"Abr 2019","201904")
+#get_lasalud(91,"Abr 2019","201904")
+#get_elpueblo(91,"Abr 2019","201904")
 #get_camila(89,"Feb 2019","201902")
 #get_lavida(89,"Feb 2019","201902")
 #get_launo(89,"Feb 2019","201902")
 #get_labuena(89,"Feb 2019","201902")
-get_sanjose(91,"Abr 2019","201904")
+#get_sanjose(91,"Abr 2019","201904")
     
-'''
+
 
 #BUSQUEDA CON EXPRECIONES REGULARES
 #co=colocacion[colocacion['ARTÍCULO'].str.contains('TAB$', regex=True)]
@@ -453,6 +499,6 @@ get_sanjose(91,"Abr 2019","201904")
 
 
 
-    
+    '''
    
 

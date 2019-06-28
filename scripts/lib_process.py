@@ -65,6 +65,21 @@ def set_tq_codes_of_cli(data):
     return data
 
 
+def organiza_tq_nuevosiglo(data):
+    #se organiza cod tq para nuevo siglo se separa los que terminan en -2 y los que terminan en numeros 
+    dacon=data[data['COD PRODUCTO'].str.contains('-2$', regex=True)]
+    dasin=data[data['COD PRODUCTO'].str.contains('[0-9]{2}$', regex=True)]
+    #se elimina el -2 y se concatena
+    dacon['COD PRODUCTO']=dacon['COD PRODUCTO'].str[:-2]
+    print("dataocc",dacon['COD PRODUCTO'])
+    print(len(dacon['COD PRODUCTO']))
+    print(len(dasin['COD PRODUCTO']))
+    data=dasin.append(dacon)
+    print(len(data['COD PRODUCTO']))
+    
+    return data 
+
+
 def set_concatenado_municipio(data):
     '''concatena el municipio y el establecimiento en un columna'''
     data.MUNICIPIO.fillna("", inplace=True)
@@ -94,6 +109,11 @@ def organiza_cod_tq_aguila(data):
     
     
     return data 
+def organiza_tq_integral(data):
+    data=data[data['COD PRODUCTO'] != 57602]
+    data=data[data['DESCRIPCIÓN'] != "LORAZEPAM MK 1 MG X 1 TAB (DNM)"]
+    
+    return data
 
 def organiza_cod_tq_jheral(data):
     data.ix[data.PRESENTACIÓN== '1x5', 'COD TQ'] = 365354
@@ -191,7 +211,7 @@ def set_tq_code_descripcion(data,client,hoja):
 
 
 
-def set_tq_code(data, client):
+def set_tq_code(data, client,hoja):
     """
     Obtener el código TQ respectivo de cada artículo, usando el código
     que maneja el cliente.
@@ -214,125 +234,45 @@ def set_tq_code(data, client):
     c = data.columns
     no_codigos=None
     articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
-                                        sheet_name=client, header=0)
+                                        sheet_name=hoja, header=0)
+       
+    articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
     
-    nombres={'NOMBRE TQ ','NOMBRE ARTICULO CLIENTE','Descripción','NOMBRE ARTICULO','\'Nombre Articulo','PRODUCTO','nombre','Descripcion','DESCRIPCION','NOMBRE ART','NOMBRE','NOMB CLIENTE','NOMBRE CLI','Etiquetas de fila','DESC ARTI','Artículo'}
+    
+   
+            
+    
+    articulos_tq_cliente["COD PRODUCTO"] = articulos_tq_cliente["COD PRODUCTO"].astype(str)
+    data["COD PRODUCTO"].fillna(0, inplace=True)
+    data["COD PRODUCTO"] = data["COD PRODUCTO"].astype(str)
+    data = pd.merge(data, articulos_tq_cliente[['COD PRODUCTO', 'COD TQ']], how="left",
+                        left_on="COD PRODUCTO", right_on="COD PRODUCTO")
+    #data.drop([cod_prod], axis=1, inplace=True)
+    # Si faltan articulos por codigo, debe hacerse la búsqueda por descripción.
+    
+    
+        
 
-    for nombre in nombres:
-        if str(nombre) in articulos_tq_cliente.columns:
-            nombre_prod=nombre    
-            
-   # articulos_tq_cliente.rename(columns={nombre_prod: "NOMB CLIENTE"}, inplace=True)
-    if ("NOMB TQ" not in articulos_tq_cliente.columns):
-        articulos_tq_cliente["NOMB TQ"] = articulos_tq_cliente[nombre_prod]
-
-    articulos_tq_cliente.fillna(0, inplace=True)
-    # Se eliminan los duplicados
-    codigos={'Código Interno','COD CLIENTE','Codigo Art.','\'Material','CODIGO','DIFARE - ZEUS','COD. BARRAS','codigobarra','COD CLI 2','COD CLI','Codigo Producto Cliente','COD_PROD','COD ART','COD CEFA','COD PRODUCTO'}
-    for codigo in codigos:
-        if str(codigo) in articulos_tq_cliente.columns:
-            cod_prod=codigo
-            break
-        else:
-            cod_prod=None
-         
-    codigos_tq={'COD TQ','Cod TQ','COD TQ ','\'Código TQ','Cod tq','Codigo Producto TQ','COD TQ.1'}
-    for codigo_tq in codigos_tq:
-        if str(codigo_tq) in articulos_tq_cliente.columns:
-            cod_prod_tq=codigo_tq
-            
-            break
-        else:
-            cod_prod_tq="COD TQ"
+    # Obtener los articulos que definitivamente no tienen codigo
     
-    if cod_prod is None:
-        
-        data['DESCRIPCIÓN'] = data['DESCRIPCIÓN'].str.strip().str.upper().str.replace('  ', ' ')
-        articulos_tq_cliente[nombre_prod] = articulos_tq_cliente[nombre_prod].str.strip().str.upper().str.replace('  ', ' ')
-        data['DESCRIPCIÓN'] = data['DESCRIPCIÓN'].str.strip().str.upper().str.replace(' ', ' ')
-        articulos_tq_cliente[nombre_prod] = articulos_tq_cliente[nombre_prod].str.strip().str.upper().str.replace(' ', ' ')
-        articulos_tq_cliente =articulos_tq_cliente.groupby(nombre_prod).first()
-        articulos_tq_cliente.reset_index(level=0, inplace=True)
-        base_inv=pd.merge(data,articulos_tq_cliente[[nombre_prod, cod_prod_tq]], how="left", left_on="DESCRIPCIÓN", right_on=nombre_prod)
-        
-        #EXPORTAMOS DATOS SIN CODIGO
-        base_inv.rename(columns={cod_prod_tq: "COD TQ"}, inplace=True)
-        
-        
-        data = base_inv[base_inv["COD TQ"] != "Descontinuado"]
-        
-    else:
-        
-        
-        articulos_tq_cliente = articulos_tq_cliente.groupby([cod_prod]).last().reset_index(level=0)
-        codigos_tq={'COD TQ','Cod TQ','COD TQ ','\'Código TQ','Cod tq','Codigo Producto TQ','COD TQ.1'}
-        
-        for codigo_tq in codigos_tq:
-            if str(codigo_tq) in articulos_tq_cliente.columns:
-                
-                articulos_tq_cliente.rename(columns={codigo_tq:"COD TQ"}, inplace=True)
-                cod_prod_tq="COD TQ"
-                
-                break
-            else:
-                
-                cod_prod_tq=None
-            # Se combina con el parametro datos, para obtener el codigo de cada artículo.
-            
-        
-        articulos_tq_cliente[cod_prod] = articulos_tq_cliente[cod_prod].astype(np.int64)
-        data["COD PRODUCTO"].fillna(0, inplace=True)
-        data["COD PRODUCTO"] = data["COD PRODUCTO"].astype(np.int64)
-        data = pd.merge(data, articulos_tq_cliente[[cod_prod,cod_prod_tq, 'NOMB TQ']], how="left",
-                            left_on="COD PRODUCTO", right_on=cod_prod)
-        #data.drop([cod_prod], axis=1, inplace=True)
-        # Si faltan articulos por codigo, debe hacerse la búsqueda por descripción.
-        
-        if len(data[pd.isnull(data[cod_prod_tq])]) > 0:
-            
-            
-            data['DESCRIPCIÓN'] = data['DESCRIPCIÓN'].str.strip().str.upper().str.replace('  ', ' ')
-            articulos_tq_cliente[nombre_prod] = articulos_tq_cliente[nombre_prod].str.strip().str.upper().str.replace('  ', ' ')
-            data['DESCRIPCIÓN'] = data['DESCRIPCIÓN'].str.strip().str.upper().str.replace(' ', ' ')
-            articulos_tq_cliente[nombre_prod] = articulos_tq_cliente[nombre_prod].str.strip().str.upper().str.replace(' ', ' ')
-            articulos_tq_cliente =articulos_tq_cliente.groupby(nombre_prod).first()
-            articulos_tq_cliente.reset_index(level=0, inplace=True)
-            data_sincod=data[pd.isnull(data[cod_prod_tq])]
-            base_inv=pd.merge(data_sincod,articulos_tq_cliente[[nombre_prod, cod_prod_tq]], how="left", left_on="DESCRIPCIÓN", right_on=nombre_prod)
-                          
-            data = data[pd.notnull(data[cod_prod_tq])].append(base_inv)       
-            no_codigos = data[pd.isnull(data[cod_prod_tq])]
-            
-            no_codigos = no_codigos[c]
-            
-            no_codigos = no_codigos.merge(articulos_tq_cliente[[nombre_prod, cod_prod_tq, 'NOMB TQ']],
-                                how="left", left_on="DESCRIPCIÓN", right_on=nombre_prod)
-            #no_codigos.drop("NOMB CLIENTE", axis=1, inplace=True)
-            no_codigos.drop([nombre_prod], axis=1, inplace=True)
-            
-            data = data[pd.notnull(data[cod_prod_tq])].append(no_codigos)
-            
     
-        # Obtener los articulos que definitivamente no tienen codigo
-        
-        
-        data=data[data["COD TQ"] != "Descontinuado"]
-        # data=data[pd.notnull(data['COD TQ'])]
-        data=data[(data['UNIDADES'] !=  0)]
-        data=data[(data['UNIDADES']  >  0.000001)]
-        no_codigos = data[pd.isna(data[cod_prod_tq])]
-        
-        no_codigos = data[pd.isnull(data["COD TQ"])]
-        if len(no_codigos) > 0:
-            print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
-        """    
-            raise Exception({
-                "status": "ERROR",
-                "message": "No se logró obtener los codigos TQ",
-                "result": no_codigos.loc[:, ["DESCRIPCIÓN',"]].drop_duplicates().to_json(orient="split")
-            })
-        """
-        
+    data=data[data["COD TQ"] != "Descontinuado"]
+    # data=data[pd.notnull(data['COD TQ'])]
+    data=data[(data['UNIDADES'] !=  0)]
+    #data=data[(data['UNIDADES']  >  0.000001)]
+    #no_codigos = data[pd.isna(data[cod_prod_tq])]
+    
+    no_codigos = data[pd.isnull(data["COD TQ"])]
+    if len(no_codigos) > 0:
+        print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+    """    
+        raise Exception({
+            "status": "ERROR",
+            "message": "No se logró obtener los codigos TQ",
+            "result": no_codigos.loc[:, ["DESCRIPCIÓN',"]].drop_duplicates().to_json(orient="split")
+        })
+    """
+    
     return data, no_codigos
 
 
@@ -918,12 +858,12 @@ def set_price_hist(data,client,hoja):
     
     no_codigos = data[pd.isnull(data["PRECIO"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los precios para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los precios para: " + no_codigos.loc[:,["COD TQ"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
             "message": "No se logró obtener los precios",
-            "result": no_codigos.loc[:, ["DESCRIPCIÓN',"]].drop_duplicates().to_json(orient="split")
+            "result": no_codigos.loc[:, ["COD TQ',"]].drop_duplicates().to_json(orient="split")
         })
     """
     
@@ -997,12 +937,12 @@ def set_price_nor(data,ref_cliente,pertenencia_nor,pertenencia):
     
     no_codigos = consolidados2[pd.isnull(consolidados2["PRECIO"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los precios para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los precios para: " + no_codigos.loc[:,["COD TQ"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
             "message": "No se logró obtener los precios",
-            "result": no_codigos.loc[:, ["DESCRIPCIÓN',"]].drop_duplicates().to_json(orient="split")
+            "result": no_codigos.loc[:, ["COD TQ',"]].drop_duplicates().to_json(orient="split")
         })
     """
     
@@ -1669,6 +1609,10 @@ def get_form_report_3_nor_depositos(data, extra_data,blistea):
 
     """
     data["COD ESTABLECIMIENTO"].fillna(0, inplace=True)
+    data["MUNICIPIO"].fillna("", inplace=True)
+    data["CLIENTES DETALLADOS"].fillna("", inplace=True)
+    data["ESTABLECIMIENTO"].fillna("", inplace=True)
+    data["GRUPO"].fillna("", inplace=True)
     
     if "COD PDV TQ" not in data.columns:
         data['COD PDV TQ']=""
@@ -1686,7 +1630,7 @@ def get_form_report_3_nor_depositos(data, extra_data,blistea):
             data.drop("INVENTARIO", axis=1, inplace=True)
         data=data[data.EVACUACION != 0]
         
-        data = data.groupby("COD TQ").agg({"PRECIO": "first", "EVACUACION": "sum", "FORMATO": "first",  "ESTABLECIMIENTO": "first", "CLIENTES DETALLADOS": "first", "COD ESTABLECIMIENTO": "first", "GRUPO": "first", "MUNICIPIO":"first"}).reset_index()
+        #data = data.groupby(["COD TQ","MUNICIPIO"]).agg({"PRECIO": "first", "EVACUACION": "sum", "FORMATO": "first",  "ESTABLECIMIENTO": "first", "CLIENTES DETALLADOS": "first", "COD ESTABLECIMIENTO": "first", "GRUPO": "first"}).reset_index()
     
         # Se calcula los precios de la evacuacion y del inventario
         data["EVACUACION VALORES"] = data["PRECIO"] * data["EVACUACION"]

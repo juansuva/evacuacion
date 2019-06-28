@@ -42,4 +42,9 @@ def get_elaguila(orden,fecha,formatofecha):
     #se exporta el excel
     colocacion.to_excel("../salida/reportes_elaguila_valorizada.xlsx")
 
-get_elaguila(91,"Abr 2019","201904")
+if len(sys.argv) >=2:
+    get_elaguila(sys.argv[1],sys.argv[2],sys.argv[3])
+else:
+    
+
+    get_elaguila(91,"Abr 2019","201904")
