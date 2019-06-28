@@ -7,8 +7,21 @@ Scripts para la evacuacion interna
 
 Es necesario tener la ultima version de Python, Pandas, Numpy. Se aconseja usar Spyder 3.3.4 el cual integra todas las libreria requeridas
 
+
+Para la ejecucion desde un terminal de windows:
 ```
 py -3 0.script.py
+```
+
+Para la ejecución en linux:
+```
+python3 0.script.py
+```
+
+Para la ejecución en MAC:
+
+```
+python3 0.script.py
 ```
 
 
