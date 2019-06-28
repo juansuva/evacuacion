@@ -10,17 +10,17 @@ py -3 0.script.py
 ```
 
 
-### Estructura
+### ESTRUCTURA
 
-##Entradas
+#####Entradas
 
 En esta carpeta se encuentra todas la entradas requeridas para el processo 
 
-##Salidas
+###Salidas
 
 En esta carpeta se encuentran todos los reportes generados en el processo
 
-##scripts
+###Scripts
 
 En esta carpeta se encuentra cada uno de los scripts y tambien se encuentra la libreria necesaria para esta
 lib_process.py
