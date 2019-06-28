@@ -115,6 +115,17 @@ def organiza_tq_integral(data):
     
     return data
 
+def organiza_tq_santalucia2(data):
+    
+    data['COD TQ']=data['COD TQ'].astype(str)
+    '''
+    data.ix[data['COD TQ']== 'NE', 'COD TQ'] = -1
+    data['COD TQ']=data['COD TQ'].astype(np.int64)
+    '''
+    data=data[data['COD TQ'] !="NE"]
+    data['COD TQ']=data['COD TQ'].astype(np.int64)
+    return data
+
 def organiza_cod_tq_jheral(data):
     data.ix[data.PRESENTACIÓN== '1x5', 'COD TQ'] = 365354
     data.ix[data.PRESENTACIÓN== '2x5', 'COD TQ'] = 355292
@@ -386,6 +397,7 @@ def set_tq_codes2(data, client,hoja):
     #quitamos descontinuados de cod productos y de codigos tq y volvemos tipo entero
     articulos_tq_clientes=articulos_tq_cliente[articulos_tq_cliente["COD PRODUCTO"] != "Descontinuado"]    
     articulos_tq_clientes['COD PRODUCTO'].fillna(0, inplace=True)
+    
     articulos_tq_clientes['COD PRODUCTO']=articulos_tq_clientes['COD PRODUCTO'].astype(np.int64)
     #obtenemos los que no tiene cod producto y agrupamos por descripcion
     data_sincod=articulos_tq_clientes[articulos_tq_clientes['COD PRODUCTO']==0]
@@ -576,6 +588,17 @@ def calculate_units_s(data,client):
     
     return data
         
+
+def calculate_units_santalucia(data):
+    data['COD PRODUCTO']=data['COD PRODUCTO'].astype(np.int64)
+    datablis=data[(data['COD PRODUCTO'] == 154249) | (data['COD PRODUCTO'] == 154248)]
+    datasinblis=data[(data['COD PRODUCTO'] != 154249) | (data['COD PRODUCTO'] != 154248)]
+    datablis['UNIDADES DEF']=datablis['UNIDADES'] / 12
+    datasinblis['UNIDADES DEF']=datasinblis['UNIDADES']
+    
+    data=datasinblis.append(datablis)
+    return data
+
 
 def calculate_units(data, client):
     """
@@ -1166,6 +1189,26 @@ def get_consolidated_report_depositos_su(data):
     consolidado = data[["COD TQ", "MUNICIPIO","COD ESTABLECIMIENTO" ,"ESTABLECIMIENTO","CLIENTES DETALLADOS","GRUPO" ,"COD PRODUCTO", "DESCRIPCIÓN", "UNIDADES","PRECIO","TIPO","FORMATO"]]
     return consolidado
 
+def get_consolidated_report_depositos(data):
+    """
+    Se contruye el reporte CONSOLIDADO a partir de un conjunto de articulos del cliente.
+
+    Parameters:
+        data (DataFrame): Conjunto de artículos del cliente
+    
+    Returns
+    COD TQ	MUNICIPIO	COD ESTABLECIMIENTO	ESTABLECIMIENTO	CLIENTES DETALLADOS		GRUPO	COD PRODUCTO	DESCRIPCIÓN	UNIDADES	PRECIO	TIPO	FORMATO
+
+
+        consolidado (Dataframe): Reporte consolidado
+    """
+    if "CLIENTES DETALLADOS" not in data.columns:
+        data["CLIENTES DETALLADOS"]=""
+        
+    data.rename(columns={ "Grupo establecimiento": "GRUPO"}, inplace=True)
+    consolidado = data[["COD TQ", "MUNICIPIO","COD ESTABLECIMIENTO" ,"ESTABLECIMIENTO","CLIENTES DETALLADOS","GRUPO" ,"COD PRODUCTO", "DESCRIPCIÓN", "UNIDADES","UNIDADES DEF","PRECIO","TIPO","FORMATO"]]
+    return consolidado
+
 def get_consolidated_report_cadenas_su(data):
     """
     Se contruye el reporte CONSOLIDADO a partir de un conjunto de articulos del cliente.
@@ -1636,71 +1679,19 @@ def get_form_report_3_nor_depositos(data, extra_data,blistea):
         data["EVACUACION VALORES"] = data["PRECIO"] * data["EVACUACION"]
         
     elif blistea==1:
-        data = data.pivot_table("UNIDADES DEF", ["COD TQ", "FORMATO", "COD NEG", "PRECIO"], "TIPO", aggfunc={
+        data = data.pivot_table("UNIDADES DEF", ["COD TQ", "FORMATO", "COD NEG", "PRECIO","GRUPO","ESTABLECIMIENTO","CLIENTES DETALLADOS","COD ESTABLECIMIENTO","MUNICIPIO"], "TIPO", aggfunc={
                                 "UNIDADES DEF": "sum"}).fillna(0).reset_index()
         
         
         data.rename(columns={"INV": "INVENTARIO", "VTA": "EVACUACION"}, inplace=True)
         data.drop("INVENTARIO", axis=1, inplace=True)
         data=data[data.EVACUACION != 0]
-        data = data.groupby("COD TQ").agg({"PRECIO": "first",  "EVACUACION": "sum", "FORMATO": "first"}).reset_index()
+        #data = data.groupby("COD TQ").agg({"PRECIO": "first",  "EVACUACION": "sum", "FORMATO": "first"}).reset_index()
     
         # Se calcula los precios de la evacuacion y del inventario
         data["EVACUACION VALORES"] = data["PRECIO"] * data["EVACUACION"]
         
-        
-    '''
-    # Lectura del archivo de ventas e inventario
-    venta_inv = pd.read_excel("{}/{}".format(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
-                            sheet_name="Venta e Inventario Salvador", skiprows=2)
-    venta_inventario = venta_inv.loc[:, ['Articulo', 'Mes', 'Canal', 'Cliente Padre', 'Cliente', 'Unidades vta comer' ,'Valor des com']]
-    # Se modifica los tipos de datos en los campos a tratar
-    venta_inventario["Articulo"] = venta_inventario["Articulo"].astype(np.int64)
-    venta_inventario["Cliente"] = venta_inventario["Cliente"].astype(np.int64)
-    data["COD TQ"] = data["COD TQ"].astype(np.int64)
-    
-    # se obtiene la venta e inventario del cliente
-    venta_inventario = venta_inventario[(venta_inventario['Mes'] == extra_data["MES_ORDEN"]) & (venta_inventario['Cliente Padre'] == extra_data["COD_CLIPADRE"]) & (venta_inventario['Canal'] == extra_data["COD_CANAL"])]
-    
-    venta_inventario =venta_inventario[(venta_inventario["Unidades vta comer"] != 0) | (venta_inventario["Valor des com"] != 0)]
-    
-    data = data.merge(venta_inventario[['Articulo', 'Unidades vta comer', 'Valor des com']], how="left", left_on=["COD TQ"], right_on=["Articulo"])
-    data.drop("Articulo", axis=1, inplace=True)
-    data.rename(columns={"Unidades vta comer": "COLOCACION", "Valor des com": "COLOCACION V36"}, inplace=True)
-    data = data.groupby(['COD TQ', 'PRECIO', 'INVENTARIO', 'EVACUACION', 'EVACUACION VALORES',
-                         'INVENTARIO VALORES', "FORMATO"]).agg({"COLOCACION": "sum", "COLOCACION V36": "sum"}).reset_index()
-
-    # Se obtiene los articulos que no registró el cliente
-    resto = data.merge(venta_inventario, how="right", left_on="COD TQ", right_on="Articulo")
-    resto = resto[resto["COD TQ"].isna()]
-    resto = resto[['Articulo', 'Unidades vta comer', 'Valor des com']]
-    resto.rename(columns={"Articulo": "COD TQ", "Unidades vta comer": "COLOCACION", "Valor des com": "COLOCACION V36"}, inplace=True)
-    ## Se calcula los precios de los sobrantes
-    if extra_data["COD_CANAL"]== 97:
-        hoja="MAYORISTAS"
-        sheet="Lista de Precios Mayoristas"
-    elif extra_data["COD_CANAL"]== 91:
-        hoja="CADENAS"
-        sheet="Lista de Precios Cadenas"
-    elif extra_data["COD_CANAL"]== 92:
-        hoja="DEPOSITOS"         
-        sheet="Lista de Precios Depósitos"
-        
-    
-    if "COD NEG" in resto.columns:
-        
-        resto.drop("COD NEG", axis=1, inplace=True)
-    resto=set_concatenated_and_format(resto,"MAESTRA EL SALVADOR")
-    if aliado==0:        
-        resto, sin_precio_resto = set_price_nor(resto, page_client,sheet,hoja)
-    elif aliado==1:
-         resto, sin_precio_resto = set_price_nor_aliados(resto, page_client,sheet,hoja)
-    ## Se clasifica en bonima o tq
-    resto['COD TQ']=resto['COD TQ'].astype(np.int64)
-    #resto["FORMATO"] = resto.apply(lambda x: "BONIMA" if x["COD TQ"].startswith("300") else "TQ", axis=1)
-    ## Se juntan los sobrantes al resto de artículos
-    data = data.append(resto).fillna(0)
-    '''
+   
     if "COD NEG" in data.columns:
         data.drop("COD NEG", axis=1, inplace=True)
     maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),

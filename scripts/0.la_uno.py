@@ -6,6 +6,7 @@ Created on Thu Jun 27 08:28:07 2019
 """
 
 import pandas as pd
+import sys
 from lib_process import *
 
 
@@ -42,4 +43,8 @@ def get_launo(orden,fecha,formatofecha):
     #se genera reporte de valorizacion nor 
     colocacion=get_form_report_NOR(con, extra_data_launo, 'FARMACIA UNO',0,1)
     colocacion.to_excel("../salida/reportes_la_uno_valorizada.xlsx")
-get_launo(89,"Feb 2019","201902")
+
+if len(sys.argv) >=2:
+    get_launo(sys.argv[1],sys.argv[2],sys.argv[3])
+else: 
+    get_launo(89,"Feb 2019","201902")

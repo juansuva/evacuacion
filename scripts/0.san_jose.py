@@ -49,5 +49,7 @@ def get_sanjose(orden,fecha,formatofecha):
     colocacion=get_form_report_mayorista(consolidado, extra_data_sanjose, 'El Aguila',0,0)
     colocacion.to_excel("../salida/reportes_SAN_JOSE_valorizada.xlsx")
     
-    
-get_sanjose(91,"Abr 2019","201904")
+if len(sys.argv) >=2:
+    get_sanjose(sys.argv[1],sys.argv[2],sys.argv[3])
+else: 
+    get_sanjose(91,"Abr 2019","201904")

@@ -7,6 +7,7 @@ Created on Thu Jun 27 08:28:19 2019
 
 import pandas as pd
 from lib_process import *
+import sys
 
 def get_jheral(orden,fecha,formatofecha):
     ##se obtiene los datos del cliente
@@ -40,4 +41,8 @@ def get_jheral(orden,fecha,formatofecha):
     colocacion=get_form_report_mayorista(con, extra_data_jheral, 'Jheral Farma',0,0)
     colocacion.to_excel("../salida/reportes_jheral_valorizada.xlsx")
     
-get_jheral(91,"Abr 2019","201904")
+if len(sys.argv) >=2:
+    get_jheral(sys.argv[1],sys.argv[2],sys.argv[3])
+else: 
+    
+    get_jheral(91,"Abr 2019","201904")

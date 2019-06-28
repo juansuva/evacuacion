@@ -408,7 +408,7 @@ def get_sanjose(orden,fecha,formatofecha):
     colocacion=get_form_report_mayorista(consolidado, extra_data_sanjose, 'El Aguila',0,0)
     colocacion.to_excel("reportes_SAN_JOSE_valorizada.xlsx")
 
-
+'''
 
 #cargamos los datos del cliente
 da_cefa=get_data_all("0. Cefa.xlsx")
@@ -442,7 +442,7 @@ col.to_excel("reporte 3 cefa.xlsx")
 
 
 #cargamos los datos del cliente
-
+'''
 
 '''
 #cargamos los datos del cliente
@@ -477,6 +477,10 @@ col.to_excel("reporte 3 americana.xlsx")
 
 #get_americana(91,"Abr 2019","201904")
     
+
+
+
+
 
 #get_lacefa(91,"Abr 2019","201904")
 #get_jheral(91,"Abr 2019","201904")

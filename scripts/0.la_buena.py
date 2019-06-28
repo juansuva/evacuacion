@@ -7,6 +7,7 @@ Created on Thu Jun 27 08:28:00 2019
 
 import pandas as pd
 from lib_process import *
+import sys
 
 def get_labuena(orden,fecha,formatofecha):
     ##se obtiene los datos del cliente
@@ -40,4 +41,7 @@ def get_labuena(orden,fecha,formatofecha):
     colocacion=get_form_report_NOR(con, extra_data_labuena, 'FARMACIA LA BUENA',1,0)
     colocacion.to_excel("../salida/reportes_la_buena_valorizada.xlsx")
     
-get_labuena(89,"Feb 2019","201902")
+if len(sys.argv) >=2:
+    get_labuena(sys.argv[1],sys.argv[2],sys.argv[3])
+else: 
+    get_labuena(89,"Feb 2019","201902")

@@ -7,6 +7,7 @@ Created on Thu Jun 27 08:28:16 2019
 
 import pandas as pd
 from lib_process import *
+import sys
 
 def get_elpueblo(orden,fecha,formatofecha):
     da_elpueblo=get_data_all("0. El Pueblo.xlsx")
@@ -37,4 +38,8 @@ def get_elpueblo(orden,fecha,formatofecha):
     colocacion=get_form_report_mayorista(consolidado, extra_data_elpueblo, 'El Pueblo',0,0)
     colocacion.to_excel("../salida/reportes_elpueblo_valorizada.xlsx")
     
-get_elpueblo(91,"Abr 2019","201904")
+if len(sys.argv) >=2:
+    get_elpueblo(sys.argv[1],sys.argv[2],sys.argv[3])
+else: 
+    
+    get_elpueblo(91,"Abr 2019","201904")

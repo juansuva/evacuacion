@@ -7,6 +7,7 @@ Created on Thu Jun 27 08:28:14 2019
 
 import pandas as pd
 from lib_process import *
+import sys
 
 def get_lasalud(orden,fecha,formatofecha):
     ##se obtiene los datos del cliente
@@ -40,4 +41,8 @@ def get_lasalud(orden,fecha,formatofecha):
     colocacion=get_form_report_mayorista(con, extra_data_lasalud, 'La Salud',0,0)
     colocacion.to_excel("../salida/reportes_la_salud_valorizada.xlsx")
     
-get_lasalud(91,"Abr 2019","201904")
+    
+if len(sys.argv) >=2:
+    get_lasalud(sys.argv[1],sys.argv[2],sys.argv[3])
+else: 
+    get_lasalud(91,"Abr 2019","201904")

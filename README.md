@@ -8,14 +8,23 @@ Scripts para la evacuacion interna
 Es necesario tener la ultima version de Python, Pandas, Numpy. Se aconseja usar Spyder 3.3.4 el cual integra todas las libreria requeridas
 
 
-Para la ejecucion desde un terminal de windows:
+Para la ejecucion desde un terminal de windows se puede ejecutar sin parametros ejecuta el mes de abril o se le pasa la orden y el requerido:
 ```
 py -3 0.script.py
+```
+o
+```
+py -3 0.script.py orden fecha formatofecha
 ```
 
 Para la ejecución en linux:
 ```
 python3 0.script.py
+```
+o
+
+```
+python3 0.script.py 91 "Abr 2019" "201904"
 ```
 
 Para la ejecución en MAC:
