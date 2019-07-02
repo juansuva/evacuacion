@@ -37,7 +37,7 @@ def get_launo(orden,fecha,formatofecha):
     
     consolidado.to_excel("../salida/CONSOLIDADO_UNO.xlsx")
     extra_data_launo = { 'ORDEN': orden, 'MES_ORDEN': fecha, 'FORMATO_FECHA': formatofecha, 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
-                          'COD_CANAL': 91,'CANAL': "91 Cadenas de Dorguería", 'COD_CLIPADRE': 2851, 'REF_CLIENTE': "FARMACIA UNO",
+                          'COD_CANAL': 91,'CANAL': "91 Cadenas de Droguería", 'COD_CLIPADRE': 2851, 'REF_CLIENTE': "FARMACIA UNO",
                           'FLAG_CUA_BAS': ""
              }
     #se genera reporte de valorizacion nor 

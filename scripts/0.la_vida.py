@@ -35,7 +35,7 @@ def get_lavida(orden,fecha,formatofecha):
     consolidado.drop("COD NEG", axis=1, inplace=True)     
     consolidado.to_excel("../salida/CONSOLIDADO_LAVIDA.xlsx")
     extra_data_lavida = { 'ORDEN': orden, 'MES_ORDEN': fecha, 'FORMATO_FECHA': formatofecha, 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
-                          'COD_CANAL': 91,'CANAL': "91 Cadenas de Dorguería", 'COD_CLIPADRE': 2844, 'REF_CLIENTE': "FARMACIA LA VIDA",
+                          'COD_CANAL': 91,'CANAL': "91 Cadenas de Droguería", 'COD_CLIPADRE': 2844, 'REF_CLIENTE': "FARMACIA LA VIDA",
                           'FLAG_CUA_BAS': ""
              }
     #se obtiene reporte

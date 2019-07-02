@@ -37,12 +37,13 @@ def get_americas(orden,fecha,formatofecha):
     consolidado.to_excel("../salida/CONSOLIDADO_LAS_AMERICAS.xlsx")
     
     extra_data_america = { 'ORDEN': orden, 'MES_ORDEN': fecha, 'FORMATO_FECHA': formatofecha, 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
-                         'COD_CANAL': 92,'CANAL': "91 Cadenas de Dorguería", 'COD_CLIPADRE': 9004, 'REF_CLIENTE': "FARMACIA LAS AMERICAS",
+                         'COD_CANAL': 92,'CANAL': "91 Cadenas de Droguería", 'COD_CLIPADRE': 9004, 'REF_CLIENTE': "FARMACIA LAS AMERICAS",
                           'FLAG_CUA_BAS': ""
              }
     #se obtiene reporte
     colocacion,resto=get_form_report(con, extra_data_america, 'FARMACIA LAS AMERICAS')
-    colocacion['ORDEN']=91
+    colocacion['COD_CANAL']=91
+    
     colocacion.to_excel("../salida/reportes_las_americas_valorizada.xlsx")
 
 if len(sys.argv) >=2:

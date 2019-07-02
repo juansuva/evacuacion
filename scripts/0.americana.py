@@ -16,9 +16,12 @@ def get_americana(orden,fecha,formatofecha):
     #limpiamos unidades en (0)
     da_americana=elimina_unidades(da_americana)
     #obtenemos codigos tq
+    da_americana.to_excel("unida.xlsx")
     da_americana,nocode=set_tq_code(da_americana,'Americana','DEPOSITOS')
     #se eliminan los descontinuados 
+    da_americana.to_excel("unidadtq.xlsx")
     da_americana=elimina_descontinuado(da_americana)
+    da_americana.to_excel("unidadesc.xlsx")
     #se obtienen concateado formato y cod de negocio
     da_americana=set_concatenated_and_format(da_americana, "MAESTRA EL SALVADOR")
     #se obtiene el concatenado de municipio para obtener el grupo
@@ -38,6 +41,7 @@ def get_americana(orden,fecha,formatofecha):
                               'FLAG_CUA_BAS': ""
                  }
     coloca=get_form_report_NOR_depositos(consolidado,extra_data_cefa,"Americana",0,0)
+    
     coloca.to_excel("../salida/reportes_americana_valorizada.xlsx")
     col=get_form_report_3_nor_depositos(consolidado,extra_data_cefa,0)
     col.to_excel("../salida/reporte 3 americanas.xlsx")

@@ -39,7 +39,7 @@ def load_price_hist(tipo, lp_hist=lp_hist,):
         load_price_hist(tipo)
         
 
-       
+    
 def get_data_all(cliente):
     """Conversion de los datos provenientes de archivo excel para cualquier cliente
 
@@ -259,20 +259,22 @@ def set_tq_code(data, client,hoja):
                                         sheet_name=hoja, header=0)
        
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]            
-    
+    print("entra",len(data["DESCRIPCIÓN"]))
     articulos_tq_cliente["COD PRODUCTO"] = articulos_tq_cliente["COD PRODUCTO"].astype(str)
-    data["COD PRODUCTO"].fillna(0, inplace=True)
+    articulos_tq_cliente=articulos_tq_cliente.groupby('COD PRODUCTO').first().reset_index(0)
+    #data["COD PRODUCTO"].fillna(0, inplace=True)
     data["COD PRODUCTO"] = data["COD PRODUCTO"].astype(str)
     data = pd.merge(data, articulos_tq_cliente[['COD PRODUCTO', 'COD TQ']], how="left",
                         left_on="COD PRODUCTO", right_on="COD PRODUCTO")
+    print("sale",len(data["DESCRIPCIÓN"]))
     #data.drop([cod_prod], axis=1, inplace=True)
     # Si faltan articulos por codigo, debe hacerse la búsqueda por descripción.      
 
     # Obtener los articulos que definitivamente no tienen codigo  
     
-    data=data[data["COD TQ"] != "Descontinuado"]
+    #data=data[data["COD TQ"] != "Descontinuado"]
     # data=data[pd.notnull(data['COD TQ'])]
-    data=data[(data['UNIDADES'] !=  0)]
+    #data=data[(data['UNIDADES'] !=  0)]
     #data=data[(data['UNIDADES']  >  0.000001)]
     #no_codigos = data[pd.isna(data[cod_prod_tq])]
     
