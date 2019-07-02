@@ -150,9 +150,10 @@ def elimina_unidades(data):
 
 ##elimina los elementos que tienen codigo tq descontinuado
 def elimina_descontinuado(data):
-    data=data[data["COD TQ"] != "Descontinuado"]
-    data=data[data['COD TQ'] != 'descontinuado']
-    data=data[data['COD TQ'] != 'DESCONTINUADO']
+    if data["COD TQ"].dtype == np.str:
+        data=data[data["COD TQ"] != "Descontinuado"]
+        data=data[data['COD TQ'] != 'descontinuado']
+        data=data[data['COD TQ'] != 'DESCONTINUADO']
     return data
 
 ##organiza la pertenencia de los elemntos la vida en venta y inventario
@@ -439,11 +440,13 @@ def set_tq_codes2(data, client,hoja):
     no_codigos = no_codig
     
     ##elimina descontinuados y convierte en entero     
-    
-    bases=bases[bases["COD TQ"] != "Descontinuado"]
-    bases=bases[bases["COD TQ"] != "DESCONTINUADO"]
+    if bases["COD TQ"].dtype==np.str:
+        bases=bases[bases["COD TQ"] != "Descontinuado"]
+        bases=bases[bases["COD TQ"] != "DESCONTINUADO"]
+    no_codigos = bases[pd.isnull(bases["COD TQ"])]    
+    bases=bases[pd.to_numeric(bases['COD TQ'], errors='coerce').notnull()]
     bases['COD TQ']=bases['COD TQ'].astype(np.int64)
-    no_codigos = bases[pd.isnull(bases["COD TQ"])]
+    
     if len(no_codigos) > 0:
         print("No se logró obtener los codigos  TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
     """    
@@ -958,6 +961,7 @@ def set_price_nor(data,ref_cliente,pertenencia_nor,pertenencia):
     data_precios2["COD TQ"]=data_precios2["COD TQ"].astype(np.int64)
     bases_nor = bases_nor[bases_nor["COD TQ"] != "Descontinuado"]
     bases_nor["COD TQ"]=bases_nor["COD TQ"].astype(np.int64)
+    data=data[pd.to_numeric(bases['COD TQ'], errors='coerce').notnull()]
     data["COD TQ"]=data["COD TQ"].astype(np.int64)
     #consolidamos precios
     consolidado=data.merge(data_precios2[['COD TQ','PRECIO']], how="left", on="COD TQ")
