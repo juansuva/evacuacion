@@ -38,7 +38,8 @@ def load_price_hist(tipo, lp_hist=lp_hist,):
         load_hist=0
         load_price_hist(tipo)
         
-        
+
+       
 def get_data_all(cliente):
     """Conversion de los datos provenientes de archivo excel para cualquier cliente
 
@@ -90,7 +91,7 @@ def set_concatenado_municipio(data):
     return data
 
 def set_grupo(data):
-    
+    '''obtiene grupos a los que pertenecen los productos  a partie de uni el municipio y nombre de negecio'''
     grupos=pd.read_excel("{}/{}".format(inputPathMaestras, "Grupo Depositos - CAM.xlsx"),
                                         sheet_name="Depositos- Salvador", header=0)
     print("fefa",grupos.columns)
@@ -103,18 +104,23 @@ def set_grupo(data):
 
 
 def organiza_cod_tq_aguila(data):
+    '''organizan los codigos de procutos de acetaminofem y 3001428 '''
     data.ix[data.DESCRIPCIÓN== 'ACETAMINOFEN MK 500 MG. X 100 TABLETAS', 'COD PRODUCTO'] = 3006128
     data['COD PRODUCTO']=data['COD PRODUCTO'].astype(np.int64)
     data.ix[data['COD PRODUCTO']== 3001428 , 'COD PRODUCTO']=3001420
     
     
     return data 
+
+##organiza los codigos tq de integral eliminando los productos de codigo 57602 y lorazepam
 def organiza_tq_integral(data):
+    
     data=data[data['COD PRODUCTO'] != 57602]
     data=data[data['DESCRIPCIÓN'] != "LORAZEPAM MK 1 MG X 1 TAB (DNM)"]
     
     return data
 
+##organiza los codigos de Te de santa lucia quitando los productos que tienen NE 
 def organiza_tq_santalucia2(data):
     
     data['COD TQ']=data['COD TQ'].astype(str)
@@ -126,6 +132,7 @@ def organiza_tq_santalucia2(data):
     data['COD TQ']=data['COD TQ'].astype(np.int64)
     return data
 
+##Organiza los codigos de tq para los productos de dichas presentaciones
 def organiza_cod_tq_jheral(data):
     data.ix[data.PRESENTACIÓN== '1x5', 'COD TQ'] = 365354
     data.ix[data.PRESENTACIÓN== '2x5', 'COD TQ'] = 355292
@@ -133,7 +140,7 @@ def organiza_cod_tq_jheral(data):
     
     return data 
 
-
+##elimina las unidades == 0
 def elimina_unidades(data):
     data=data[pd.notnull(data.UNIDADES)]
     data.UNIDADES=data.UNIDADES.astype(np.float64)
@@ -141,32 +148,34 @@ def elimina_unidades(data):
     
     return data
 
+##elimina los elementos que tienen codigo tq descontinuado
 def elimina_descontinuado(data):
     data=data[data["COD TQ"] != "Descontinuado"]
     data=data[data['COD TQ'] != 'descontinuado']
     data=data[data['COD TQ'] != 'DESCONTINUADO']
     return data
 
+##organiza la pertenencia de los elemntos la vida en venta y inventario
 def organiza_tipo_lavida(data):
     data.ix[data.TIPO== 'EXISTENCIA', 'TIPO'] = "INV"
     data.ix[data.TIPO== 'VENTAS 30', 'TIPO'] = "VTA"
     return data 
     
+##organiza el codigo tq del producto vita c naranja de la salud 
 def organiza_cod_tq_salud(data):
     data.ix[data.DESCRIPCIÓN== 'Vita C Naranja', 'COD TQ'] = 2120571
     return data 
 
+##orgniza los codigo tq de sanjose 
 def organiza_cod_tq_sanjose(data,cod):
     
-    for indice_fila, fila in cod.iterrows():
-       
-        
+    for indice_fila, fila in cod.iterrows():        
         data.ix[data['COD TQ'].astype(str)== str(fila._values)[1 : -1], 'COD TQ'] = 0
     return data 
        
 
     
- 
+##valida los codigos tq del cliente que tenga el mismo codigo de producto y descripcion 
 def valida_codtq(data,client,hoja):
     articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
@@ -180,6 +189,8 @@ def valida_codtq(data,client,hoja):
     
     return dat
     
+
+
 def set_tq_code_descripcion(data,client,hoja):
     '''obtienen los codigos de TQ a partir de la descripcion
         Parameters:
@@ -210,7 +221,7 @@ def set_tq_code_descripcion(data,client,hoja):
     concodigos = datacod[pd.notnull(datacod['COD TQ'])]
     no_codigos = datacod[pd.isnull(datacod["COD TQ"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los codigos de TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
@@ -247,11 +258,7 @@ def set_tq_code(data, client,hoja):
     articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
        
-    articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
-    
-    
-   
-            
+    articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]            
     
     articulos_tq_cliente["COD PRODUCTO"] = articulos_tq_cliente["COD PRODUCTO"].astype(str)
     data["COD PRODUCTO"].fillna(0, inplace=True)
@@ -259,13 +266,9 @@ def set_tq_code(data, client,hoja):
     data = pd.merge(data, articulos_tq_cliente[['COD PRODUCTO', 'COD TQ']], how="left",
                         left_on="COD PRODUCTO", right_on="COD PRODUCTO")
     #data.drop([cod_prod], axis=1, inplace=True)
-    # Si faltan articulos por codigo, debe hacerse la búsqueda por descripción.
-    
-    
-        
+    # Si faltan articulos por codigo, debe hacerse la búsqueda por descripción.      
 
-    # Obtener los articulos que definitivamente no tienen codigo
-    
+    # Obtener los articulos que definitivamente no tienen codigo  
     
     data=data[data["COD TQ"] != "Descontinuado"]
     # data=data[pd.notnull(data['COD TQ'])]
@@ -275,7 +278,7 @@ def set_tq_code(data, client,hoja):
     
     no_codigos = data[pd.isnull(data["COD TQ"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los Codigos TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
@@ -358,7 +361,7 @@ def set_tq_codes_str(data, client,hoja):
     no_codigos = no_codig   
     no_codigos = bases[pd.isnull(bases["COD TQ"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los Codigos de TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
@@ -440,7 +443,7 @@ def set_tq_codes2(data, client,hoja):
     bases['COD TQ']=bases['COD TQ'].astype(np.int64)
     no_codigos = bases[pd.isnull(bases["COD TQ"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los codigos  TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
@@ -546,7 +549,7 @@ def set_tq_codes_onlytq(data, client):
     
     no_codigos = data[pd.isnull(data["COD TQ"])]
     if len(no_codigos) > 0:
-        print("No se logró obtener los factores de conversion para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
+        print("No se logró obtener los codigos TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
     """    
         raise Exception({
             "status": "ERROR",
@@ -590,6 +593,7 @@ def calculate_units_s(data,client):
         
 
 def calculate_units_santalucia(data):
+    '''calcula las unidades de conversion para los productos seleccionados  dividiendolos por 12 '''
     data['COD PRODUCTO']=data['COD PRODUCTO'].astype(np.int64)
     datablis=data[(data['COD PRODUCTO'] == 154249) | (data['COD PRODUCTO'] == 154248)]
     datasinblis=data[(data['COD PRODUCTO'] != 154249) | (data['COD PRODUCTO'] != 154248)]
@@ -761,7 +765,7 @@ def set_cod_neg(data, region):
         region (str): Nombre de la region con la que se va a trabajar
 
     Returns:
-        resultado (DataFrame): Conjunto de articulos con su respectiva concatenacion y formato
+        resultado (DataFrame): Conjunto de articulos con su codigo de negocio
                         
     """
     if  'COD NEG' in data.columns:
@@ -856,6 +860,24 @@ def filter_u_codtq(data):
 
 
 def set_price_hist(data,client,hoja):
+    """
+        Hallar el precio neto de cada artículo buscando  el historial de precios.
+    
+        Parameters:
+            data (DataFrame): Conjunto de artículos. Debe tener las columnas:
+                            [
+                                'VTA_INV', 'COD CLIENTE', 'COD TQ', 'NOMB TQ', 'PDV', 
+                                'UNIDADES', 'PDV TQ', 'CONCATENADO', 'FORMATO'
+                            ]
+            hoja (str): Nombre de la pagina del cliente en la maestra
+            ref client (str): Nombre del cliente.
+            
+    
+        Returns:
+            resultado (DataFrame): Conjunto de artículos con su respectivo precio                               
+            sin_precio (DataFrame): Conjunto de artículos a los que no se le logro hallar 
+                                el precio.
+    """
     ##abrimos el archivo apartir del la hoja, y renombramos columns organizamos el mes y filtramos los datos del cliente 
     lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name=hoja, header=0)   
     lp_hist.rename(columns = { 'CIF NETO': 'PRECIO' }, inplace = True)
@@ -909,7 +931,7 @@ def set_price_nor(data,ref_cliente,pertenencia_nor,pertenencia):
             pertenencia(str): Es la clase a la que pertenece el cliente
     
         Returns:
-            resultado (DataFrame): Conjunto de artículos con su respectivo punto de venta TQ
+            resultado (DataFrame): Conjunto de artículos con su respectivo precio
                                
             sin_precio (DataFrame): Conjunto de artículos a los que no se le logro hallar 
                                 el precio.
@@ -990,7 +1012,7 @@ def set_price_nor_aliados(data,ref_cliente,pertenencia_nor,pertenencia):
         pertenencia(str): Es la clase a la que pertenece el cliente
 
     Returns:
-        resultado (DataFrame): Conjunto de artículos con su respectivo punto de venta TQ
+        resultado (DataFrame): Conjunto de artículos con su respectivo precio
                            
         sin_precio (DataFrame): Conjunto de artículos a los que no se le logro hallar 
                             el precio.
@@ -1077,7 +1099,7 @@ def set_price(data, page_client, class_client, client,hoja):
         class_client(str): Es la clase a la que pertenece el cliente
 
     Returns:
-        resultado (DataFrame): Conjunto de artículos con su respectivo punto de venta TQ
+        resultado (DataFrame): Conjunto de artículos con su respectivo precio
                             [
                                 'VTA_INV', 'COD CLIENTE', 'COD TQ', 'NOMB TQ', 'PDV', 
                                 'UNIDADES', 'PDV TQ', 'PRECIO NETO'
