@@ -36,6 +36,7 @@ def get_elpueblo(orden,fecha,formatofecha):
              }
     #se obtiene reporte para mayoristas
     colocacion=get_form_report_mayorista(consolidado, extra_data_elpueblo, 'El Pueblo',0,0)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_elpueblo_valorizada.xlsx")
     
 if len(sys.argv) >=2:

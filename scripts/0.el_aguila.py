@@ -40,6 +40,7 @@ def get_elaguila(orden,fecha,formatofecha):
     #se obtiene reporte para mayoristas
     colocacion=get_form_report_mayorista(con, extra_data_elaguila, 'El Aguila',0,0)
     #se exporta el excel
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_elaguila_valorizada.xlsx")
 
 if len(sys.argv) >=2:

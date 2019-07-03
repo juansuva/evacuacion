@@ -39,8 +39,10 @@ def get_Carosa(orden,fecha,formatofecha):
                               'FLAG_CUA_BAS': ""
                  }
     coloca=get_form_report_NOR_depositos(consolidado,extra_data_cefa,"Grupo Carosa",0,0)
+    coloca['MES ORDEN']=coloca['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     coloca.to_excel("../salida/reportes_Grupo Carosa_valorizada.xlsx")
     col=get_form_report_3_nor_depositos(consolidado,extra_data_cefa,0)
+    col['MES ORDEN']=col['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     col.to_excel("../salida/reporte 3 Grupo Carosa.xlsx")
     
     

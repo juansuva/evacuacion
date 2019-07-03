@@ -39,6 +39,7 @@ def get_lasalud(orden,fecha,formatofecha):
                           'FLAG_CUA_BAS': ""
              }
     colocacion=get_form_report_mayorista(con, extra_data_lasalud, 'La Salud',0,0)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_la_salud_valorizada.xlsx")
     
     

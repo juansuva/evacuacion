@@ -46,7 +46,8 @@ def get_sanjose(orden,fecha,formatofecha):
                           'FLAG_CUA_BAS': ""
              }
     #se genera el reporte mayoristaa
-    colocacion=get_form_report_mayorista(consolidado, extra_data_sanjose, 'El Aguila',0,0)
+    colocacion=get_form_report_mayorista(consolidado, extra_data_sanjose, 'San Jose',0,0)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_SAN_JOSE_valorizada.xlsx")
     
 if len(sys.argv) >=2:

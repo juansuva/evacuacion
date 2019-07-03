@@ -49,8 +49,10 @@ def get_laSantaLucia(orden,fecha,formatofecha):
                               'FLAG_CUA_BAS': ""
                  }
     coloca=get_form_report_NOR_depositos(consolidado,extra_data_SantaLucia,"Santa Lucia",0,1)
+    coloca['MES ORDEN']=coloca['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     coloca.to_excel("../salida/reportes_Santa Lucia_valorizada.xlsx")
     col=get_form_report_3_nor_depositos(consolidado,extra_data_SantaLucia,1)
+    col['MES ORDEN']=col['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     col.to_excel("../salida/reporte 3 Santa Lucia.xlsx")
     
     
