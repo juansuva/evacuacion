@@ -72,11 +72,9 @@ def organiza_tq_nuevosiglo(data):
     dasin=data[data['COD PRODUCTO'].str.contains('[0-9]{2}$', regex=True)]
     #se elimina el -2 y se concatena
     dacon['COD PRODUCTO']=dacon['COD PRODUCTO'].str[:-2]
-    print("dataocc",dacon['COD PRODUCTO'])
-    print(len(dacon['COD PRODUCTO']))
-    print(len(dasin['COD PRODUCTO']))
+    
     data=dasin.append(dacon)
-    print(len(data['COD PRODUCTO']))
+    
     
     return data 
 
@@ -94,15 +92,14 @@ def set_grupo(data):
     '''obtiene grupos a los que pertenecen los productos  a partie de uni el municipio y nombre de negecio'''
     grupos=pd.read_excel("{}/{}".format(inputPathMaestras, "Grupo Depositos - CAM.xlsx"),
                                         sheet_name="Depositos- Salvador", header=0)
-    print("fefa",grupos.columns)
-    print("dad",data.columns)
+    
     grupos['CONCATENADO GRUPO']=grupos['CONCATENADO GRUPO'].str.upper().str.strip()
     grupos=grupos.groupby('CONCATENADO GRUPO').first()
     data['CONCATENADO GRUPO']= data['CONCATENADO GRUPO'].astype(np.str).str.strip().str.upper()
     grupos.reset_index(level=0, inplace=True)
-    grupos.to_excel("esss.xlsx")
+    
     data=data.merge(grupos[['CONCATENADO GRUPO','Grupo establecimiento']],how="left", on="CONCATENADO GRUPO")
-    data.to_excel("grupos.xlsx")
+    
     return data, grupos
 
 
@@ -158,6 +155,7 @@ def elimina_descontinuado(data):
     data=data[data["COD TQ"] != "Descontinuado"]
     data=data[data['COD TQ'] != 'descontinuado']
     data=data[data['COD TQ'] != 'DESCONTINUADO']
+    data=data[data['COD TQ'] != 'NE']
     data["COD TQ"]=data["COD TQ"].astype(np.int64)
     return data
 
@@ -217,16 +215,16 @@ def set_tq_code_descripcion(data,client,hoja):
     no_codigos=None
     articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
-    articulos_tq_cliente.to_excel("arti.xlsx")
+    
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
-    articulos_tq_cliente.to_excel("arti0.xlsx")
+    
     
     data.DESCRIPCIÓN=data.DESCRIPCIÓN.str.strip().str.upper().str.replace('  ', ' ').str.replace('   ', ' ').str.replace('    ', ' ')
     articulos_tq_cliente.DESCRIPCION=articulos_tq_cliente.DESCRIPCION.str.strip().str.upper().str.replace('  ', ' ').str.replace('   ', ' ').str.replace('    ', ' ')
-    articulos_tq_cliente.to_excel("arti1.xlsx")
+    
     datacod=data.merge(articulos_tq_cliente[['DESCRIPCION','COD TQ']], how='left', left_on="DESCRIPCIÓN", right_on="DESCRIPCION")
-    articulos_tq_cliente.to_excel("arti12.xlsx")
-    datacod.to_excel("dataacod.xlsx")
+    
+    
     no_codigos = datacod[pd.isnull(datacod['COD TQ'])]
     concodigos = datacod[pd.notnull(datacod['COD TQ'])]
     no_codigos = datacod[pd.isnull(datacod["COD TQ"])]
@@ -269,14 +267,14 @@ def set_tq_code(data, client,hoja):
                                         sheet_name=hoja, header=0)
        
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]            
-    print("entra",len(data["DESCRIPCIÓN"]))
+    
     articulos_tq_cliente["COD PRODUCTO"] = articulos_tq_cliente["COD PRODUCTO"].astype(str)
     articulos_tq_cliente=articulos_tq_cliente.groupby('COD PRODUCTO').first().reset_index(0)
     #data["COD PRODUCTO"].fillna(0, inplace=True)
     data["COD PRODUCTO"] = data["COD PRODUCTO"].astype(str)
     data = pd.merge(data, articulos_tq_cliente[['COD PRODUCTO', 'COD TQ']], how="left",
                         left_on="COD PRODUCTO", right_on="COD PRODUCTO")
-    print("sale",len(data["DESCRIPCIÓN"]))
+    
     #data.drop([cod_prod], axis=1, inplace=True)
     # Si faltan articulos por codigo, debe hacerse la búsqueda por descripción.      
 
@@ -450,9 +448,9 @@ def set_tq_codes2(data, client,hoja):
     
     ##elimina descontinuados y convierte en entero     
     bases["COD TQ"]=bases["COD TQ"].astype(np.str)
-    if bases["COD TQ"].dtype==np.str:
-        bases=bases[bases["COD TQ"] != "Descontinuado"]
-        bases=bases[bases["COD TQ"] != "DESCONTINUADO"]
+    
+    bases=bases[bases["COD TQ"] != "Descontinuado"]
+    bases=bases[bases["COD TQ"] != "DESCONTINUADO"]
     no_codigos = bases[pd.isnull(bases["COD TQ"])]    
     bases=bases[pd.to_numeric(bases['COD TQ'], errors='coerce').notnull()]
     bases['COD TQ']=bases['COD TQ'].astype(np.int64)
@@ -578,17 +576,17 @@ def set_tq_codes_onlytq(data, client):
 def calculate_units_s(data,client):
     '''calcula unidades apartir del factor de conversion pero solo toma los articulos que empiezen con S'''
     ##obtenemos articulos que solo empiezan por S
-    data.to_excel("conve.xlsx")
+    
     co=data[data['COD PRODUCTO'].str.contains('^S', regex=True)]
     ##abrimos el archivo con los factores de conversion  y agrupamos por codigo de producto
     factor_conversion = pd.read_excel("{}/{}".format(inputPathMaestras, 'Factor de conversion - Salvador.xlsx'),
                                     sheet_name=client)
-    co.to_excel("conv2e.xls")
+    
     factor_conversion = factor_conversion.groupby("COD PRODUCTO").first().reset_index(level=0)
     ##eliminamos descripions y obtenemo el factore de conversion para la data
     factor_conversion.drop("DESCRIPCION", axis=1, inplace=True)    
     data=data.merge(factor_conversion[['COD PRODUCTO','FACTOR DE CONVERSION']],how="left", left_on="COD PRODUCTO", right_on="COD PRODUCTO")
-    data.to_excel("convert.xlsx")
+
     
     no_codigos=data[data['FACTOR DE CONVERSION'].isnull()]
     if len(no_codigos) > 0:
@@ -611,14 +609,12 @@ def calculate_units_s(data,client):
         
 
 def calculate_units_santalucia(data):
-    '''calcula las unidades de conversion para los productos seleccionados  dividiendolos por 12 '''
-    data['COD PRODUCTO']=data['COD PRODUCTO'].astype(np.int64)
-    datablis=data[(data['COD PRODUCTO'] == 154249) | (data['COD PRODUCTO'] == 154248)]
-    datasinblis=data[(data['COD PRODUCTO'] != 154249) | (data['COD PRODUCTO'] != 154248)]
-    datablis['UNIDADES DEF']=datablis['UNIDADES'] / 12
-    datasinblis['UNIDADES DEF']=datasinblis['UNIDADES']
+    data['UNIDADES DEF']=data['UNIDADES']
+     
+    data.ix[data['COD TQ']== 2023511, 'UNIDADES DEF'] =data.ix[data['COD TQ']== 2023511, 'UNIDADES DEF'] / 12
+    data.ix[data['COD TQ']== 2023504, 'UNIDADES DEF'] =data.ix[data['COD TQ']== 2023504, 'UNIDADES DEF'] / 12
     
-    data=datasinblis.append(datablis)
+    
     return data
 
 
@@ -1447,7 +1443,7 @@ def get_form_report_NOR(data, extra_data, page_client,aliado,blistea):
         
         data = data.pivot_table("UNIDADES", ["COD TQ", "FORMATO", "COD NEG", "PRECIO"], "TIPO", aggfunc={
                                 "UNIDADES": "sum"}).fillna(0).reset_index()       
-        print(data.columns)
+        
         data.rename(columns={"INV": "INVENTARIO", "VTA": "EVACUACION"}, inplace=True)
         data = data.groupby("COD TQ").agg({"PRECIO": "first", "INVENTARIO": "sum", "EVACUACION": "sum", "FORMATO": "first"}).reset_index()
     
@@ -1735,7 +1731,7 @@ def get_form_report_3_nor_depositos(data, extra_data,blistea):
         
         data = data.pivot_table("UNIDADES", ["COD TQ", "FORMATO", "COD NEG", "PRECIO","GRUPO","ESTABLECIMIENTO","CLIENTES DETALLADOS","COD ESTABLECIMIENTO","MUNICIPIO"], "TIPO", aggfunc={
                                 "UNIDADES": "sum"}).fillna(0).reset_index()       
-        print("esto",data.columns)
+        
         data.rename(columns={"INV": "INVENTARIO", "VTA": "EVACUACION"}, inplace=True)
         if "INVENTARIO" in data.columns:
             data.drop("INVENTARIO", axis=1, inplace=True)
@@ -1797,7 +1793,7 @@ def get_form_report_3_nor_depositos(data, extra_data,blistea):
 
     if "AGRUPACIÓN CANAL" not in data.columns:
         data['AGRUPACIÓN CANAL']=""
-    print (data.columns)
+    
     data.columns = data.columns.str.strip().str.upper()
     data = data[["ORDEN", "MES ORDEN", "FORMATO FECHA", "COD PAIS", "PAÍS", "COD CANAL", "CANAL", "AGRUPACIÓN CANAL","COD CLIPADRE", "REF CLIENTE", "MUNICIPIO", "COD ESTABLECIMIENTO", "ESTABLECIMIENTO", "CLIENTES DETALLADOS", "GRUPO ESTABLECIMIENTO", "COD TQ", "ARTÍCULO",
                  "PRESENTACIÓN", "COD NEGOCIO", "NEGOCIO", "COD LINEA", "LINEA", "COD MARCA", "MARCA", "CIF NETO", "ART VIGENTES",

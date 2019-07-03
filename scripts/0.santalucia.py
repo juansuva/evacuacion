@@ -16,22 +16,29 @@ def get_laSantaLucia(orden,fecha,formatofecha):
     #limpiamos unidades en (0)
     da_santalucia=elimina_unidades(da_santalucia)
     #obtenemos codigos tq
+    
     da_santalucia,nocode=set_tq_code(da_santalucia,'Santa Lucia','DEPOSITOS')
     #se eliminan los descontinuados 
+    
     da_santalucia=elimina_descontinuado(da_santalucia)
     #se obtienen concateado formato y cod de negocio
     
     
     da_santalucia=organiza_tq_santalucia2(da_santalucia)
+    
     da_santalucia=set_concatenated_and_format(da_santalucia, "MAESTRA EL SALVADOR")
     #se obtiene el concatenado de municipio para obtener el grupo
+    
     da_santalucia=set_concatenado_municipio(da_santalucia)
     #obtenermos el grupo de los pdv
+    
     da_santalucia,gr=set_grupo(da_santalucia)
     #obtenemos precios
+    
     da_santalucia,no_price=set_price_nor(da_santalucia,"Santa Lucia","Lista de Precios Depósitos","DEPOSITOS")
     
     da_santalucia=calculate_units_santalucia(da_santalucia)
+    
     consolidado=get_consolidated_report_depositos(da_santalucia)
     consolidado.reset_index(level=0, inplace=True)
     consolidado.drop("index", axis=1, inplace=True)
