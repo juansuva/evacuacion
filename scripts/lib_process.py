@@ -156,7 +156,11 @@ def elimina_descontinuado(data):
     data=data[data['COD TQ'] != 'descontinuado']
     data=data[data['COD TQ'] != 'DESCONTINUADO']
     data=data[data['COD TQ'] != 'NE']
-    data["COD TQ"]=data["COD TQ"].astype(np.int64)
+    try:   
+        data["COD TQ"]=data["COD TQ"].astype(int)
+    except:
+        data["COD TQ"]=data["COD TQ"].astype(float)
+        data["COD TQ"]=data["COD TQ"].astype(int)
     return data
 
 ##organiza la pertenencia de los elemntos la vida en venta y inventario
@@ -447,13 +451,10 @@ def set_tq_codes2(data, client,hoja):
     no_codigos = no_codig
     
     ##elimina descontinuados y convierte en entero     
-    bases["COD TQ"]=bases["COD TQ"].astype(np.str)
     
-    bases=bases[bases["COD TQ"] != "Descontinuado"]
-    bases=bases[bases["COD TQ"] != "DESCONTINUADO"]
     no_codigos = bases[pd.isnull(bases["COD TQ"])]    
-    bases=bases[pd.to_numeric(bases['COD TQ'], errors='coerce').notnull()]
-    bases['COD TQ']=bases['COD TQ'].astype(np.int64)
+    #bases=bases[pd.to_numeric(bases['COD TQ'], errors='coerce').notnull()]
+    
     
     if len(no_codigos) > 0:
         print("No se logró obtener los codigos  TQ para: " + no_codigos.loc[:,["DESCRIPCIÓN"]].drop_duplicates().to_json(orient="split"))
