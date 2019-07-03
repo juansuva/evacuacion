@@ -47,7 +47,9 @@ def get_lavida(orden,fecha,formatofecha):
                           'FLAG_CUA_BAS': ""
              }
     #se obtiene reporte
+    
     colocacion=get_form_report_NOR(con, extra_data_lavida, 'FARMACIA LA VIDA',1,0)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_la_vida_valorizada.xlsx")
     
     

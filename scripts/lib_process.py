@@ -96,11 +96,13 @@ def set_grupo(data):
                                         sheet_name="Depositos- Salvador", header=0)
     print("fefa",grupos.columns)
     print("dad",data.columns)
-    grupos['CONCATENADO GRUPO']=grupos['CONCATENADO GRUPO'].str.upper()
+    grupos['CONCATENADO GRUPO']=grupos['CONCATENADO GRUPO'].str.upper().str.strip()
     grupos=grupos.groupby('CONCATENADO GRUPO').first()
-    grupos.to_excel("grupos.xlsx")
+    data['CONCATENADO GRUPO']= data['CONCATENADO GRUPO'].astype(np.str).str.strip().str.upper()
     grupos.reset_index(level=0, inplace=True)
+    grupos.to_excel("esss.xlsx")
     data=data.merge(grupos[['CONCATENADO GRUPO','Grupo establecimiento']],how="left", on="CONCATENADO GRUPO")
+    data.to_excel("grupos.xlsx")
     return data, grupos
 
 

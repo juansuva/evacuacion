@@ -43,7 +43,7 @@ def get_americas(orden,fecha,formatofecha):
     #se obtiene reporte
     colocacion,resto=get_form_report(con, extra_data_america, 'FARMACIA LAS AMERICAS')
     colocacion['COD CANAL']=91
-    
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_las_americas_valorizada.xlsx")
 
 if len(sys.argv) >=2:

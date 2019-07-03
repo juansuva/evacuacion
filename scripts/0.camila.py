@@ -40,6 +40,7 @@ def get_camila(orden,fecha,formatofecha):
              }
     #se obtiene reporte
     colocacion=get_form_report_NOR(con, extra_data_camila, 'FARMACIA CAMILA',0,0)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_camila_valorizada.xlsx")
     
 if len(sys.argv) >=2:

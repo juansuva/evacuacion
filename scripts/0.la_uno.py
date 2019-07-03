@@ -42,6 +42,7 @@ def get_launo(orden,fecha,formatofecha):
              }
     #se genera reporte de valorizacion nor 
     colocacion=get_form_report_NOR(con, extra_data_launo, 'FARMACIA UNO',0,1)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_la_uno_valorizada.xlsx")
 
 if len(sys.argv) >=2:

@@ -41,7 +41,7 @@ def get_americana(orden,fecha,formatofecha):
                               'FLAG_CUA_BAS': ""
                  }
     coloca=get_form_report_NOR_depositos(consolidado,extra_data_cefa,"Americana",0,0)
-    
+   
     coloca.to_excel("../salida/reportes_americana_valorizada.xlsx")
     col=get_form_report_3_nor_depositos(consolidado,extra_data_cefa,0)
     col.to_excel("../salida/reporte 3 americanas.xlsx")

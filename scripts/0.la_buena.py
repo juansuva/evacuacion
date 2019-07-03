@@ -39,6 +39,7 @@ def get_labuena(orden,fecha,formatofecha):
                  }
     #se genera reporte de valorizacion nor
     colocacion=get_form_report_NOR(con, extra_data_labuena, 'FARMACIA LA BUENA',1,0)
+    colocacion['MES ORDEN']=colocacion['MES ORDEN'].str.strip().str.replace(' 20', '. ')
     colocacion.to_excel("../salida/reportes_la_buena_valorizada.xlsx")
     
 if len(sys.argv) >=2:
