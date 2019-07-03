@@ -98,6 +98,7 @@ def set_grupo(data):
     print("dad",data.columns)
     grupos['CONCATENADO GRUPO']=grupos['CONCATENADO GRUPO'].str.upper()
     grupos=grupos.groupby('CONCATENADO GRUPO').first()
+    grupos.to_excel("grupos.xlsx")
     grupos.reset_index(level=0, inplace=True)
     data=data.merge(grupos[['CONCATENADO GRUPO','Grupo establecimiento']],how="left", on="CONCATENADO GRUPO")
     return data, grupos
@@ -150,10 +151,12 @@ def elimina_unidades(data):
 
 ##elimina los elementos que tienen codigo tq descontinuado
 def elimina_descontinuado(data):
-    if data["COD TQ"].dtype == np.str:
-        data=data[data["COD TQ"] != "Descontinuado"]
-        data=data[data['COD TQ'] != 'descontinuado']
-        data=data[data['COD TQ'] != 'DESCONTINUADO']
+    
+    data["COD TQ"]=data["COD TQ"].astype(np.str).str.strip()    
+    data=data[data["COD TQ"] != "Descontinuado"]
+    data=data[data['COD TQ'] != 'descontinuado']
+    data=data[data['COD TQ'] != 'DESCONTINUADO']
+    data["COD TQ"]=data["COD TQ"].astype(np.int64)
     return data
 
 ##organiza la pertenencia de los elemntos la vida en venta y inventario
@@ -212,12 +215,16 @@ def set_tq_code_descripcion(data,client,hoja):
     no_codigos=None
     articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
+    articulos_tq_cliente.to_excel("arti.xlsx")
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
-    
+    articulos_tq_cliente.to_excel("arti0.xlsx")
     
     data.DESCRIPCIÓN=data.DESCRIPCIÓN.str.strip().str.upper().str.replace('  ', ' ').str.replace('   ', ' ').str.replace('    ', ' ')
     articulos_tq_cliente.DESCRIPCION=articulos_tq_cliente.DESCRIPCION.str.strip().str.upper().str.replace('  ', ' ').str.replace('   ', ' ').str.replace('    ', ' ')
+    articulos_tq_cliente.to_excel("arti1.xlsx")
     datacod=data.merge(articulos_tq_cliente[['DESCRIPCION','COD TQ']], how='left', left_on="DESCRIPCIÓN", right_on="DESCRIPCION")
+    articulos_tq_cliente.to_excel("arti12.xlsx")
+    datacod.to_excel("dataacod.xlsx")
     no_codigos = datacod[pd.isnull(datacod['COD TQ'])]
     concodigos = datacod[pd.notnull(datacod['COD TQ'])]
     no_codigos = datacod[pd.isnull(datacod["COD TQ"])]
@@ -440,6 +447,7 @@ def set_tq_codes2(data, client,hoja):
     no_codigos = no_codig
     
     ##elimina descontinuados y convierte en entero     
+    bases["COD TQ"]=bases["COD TQ"].astype(np.str)
     if bases["COD TQ"].dtype==np.str:
         bases=bases[bases["COD TQ"] != "Descontinuado"]
         bases=bases[bases["COD TQ"] != "DESCONTINUADO"]
@@ -568,14 +576,17 @@ def set_tq_codes_onlytq(data, client):
 def calculate_units_s(data,client):
     '''calcula unidades apartir del factor de conversion pero solo toma los articulos que empiezen con S'''
     ##obtenemos articulos que solo empiezan por S
+    data.to_excel("conve.xlsx")
     co=data[data['COD PRODUCTO'].str.contains('^S', regex=True)]
     ##abrimos el archivo con los factores de conversion  y agrupamos por codigo de producto
     factor_conversion = pd.read_excel("{}/{}".format(inputPathMaestras, 'Factor de conversion - Salvador.xlsx'),
                                     sheet_name=client)
+    co.to_excel("conv2e.xls")
     factor_conversion = factor_conversion.groupby("COD PRODUCTO").first().reset_index(level=0)
     ##eliminamos descripions y obtenemo el factore de conversion para la data
     factor_conversion.drop("DESCRIPCION", axis=1, inplace=True)    
     data=data.merge(factor_conversion[['COD PRODUCTO','FACTOR DE CONVERSION']],how="left", left_on="COD PRODUCTO", right_on="COD PRODUCTO")
+    data.to_excel("convert.xlsx")
     
     no_codigos=data[data['FACTOR DE CONVERSION'].isnull()]
     if len(no_codigos) > 0:
@@ -961,7 +972,7 @@ def set_price_nor(data,ref_cliente,pertenencia_nor,pertenencia):
     data_precios2["COD TQ"]=data_precios2["COD TQ"].astype(np.int64)
     bases_nor = bases_nor[bases_nor["COD TQ"] != "Descontinuado"]
     bases_nor["COD TQ"]=bases_nor["COD TQ"].astype(np.int64)
-    data=data[pd.to_numeric(bases['COD TQ'], errors='coerce').notnull()]
+    #data=data[pd.to_numeric(data['COD TQ'], errors='coerce').notnull()]
     data["COD TQ"]=data["COD TQ"].astype(np.int64)
     #consolidamos precios
     consolidado=data.merge(data_precios2[['COD TQ','PRECIO']], how="left", on="COD TQ")
@@ -1237,6 +1248,33 @@ def get_consolidated_report_depositos(data):
     consolidado = data[["COD TQ", "MUNICIPIO","COD ESTABLECIMIENTO" ,"ESTABLECIMIENTO","CLIENTES DETALLADOS","GRUPO" ,"COD PRODUCTO", "DESCRIPCIÓN", "UNIDADES","UNIDADES DEF","PRECIO","TIPO","FORMATO"]]
     return consolidado
 
+
+def get_consolidated_report_cadenas(data):
+    """
+    Se contruye el reporte CONSOLIDADO a partir de un conjunto de articulos del cliente.
+
+    Parameters:
+        data (DataFrame): Conjunto de artículos del cliente
+    
+    Returns
+    COD TQ	CONCATENADO ART	COD NEGOCIO	COD PRODUCTO	DESCRIPCIÓN	COD PDV TQ	COD PDV	NOMBRE PDV	CAJAS	UNIDADES	FACTOR DE CONVERSION	UNIDADES DEF	PRECIO	TIPO	FORMATO
+
+        consolidado (Dataframe): Reporte consolidado
+    """'''
+    consolidado = data.rename(columns={"PDV TQ": "COD PDV", "COD CLIENTE": "CODIGO", "NOMB TQ": "DESCRIPCION", "VTA_INV": "TIPO", "CONCATENADO": "CONCATE", "Precio Neto": "PRECIO"})
+    consolidado.rename(columns={"UNIDADES": "VALOR TRANSFORMADO"}, inplace=True)
+    consolidado.rename(columns={"COMPLETAS": "UNIDADES"}, inplace=True)
+    consolidado["VALOR TRANSFORMADO"] = consolidado["VALOR TRANSFORMADO"] - consolidado["UNIDADES"]
+    consolidado["FRACCIONES"] = consolidado.apply(
+        lambda x: (x["VALOR TRANSFORMADO"] / x["FACTOR CONVERSION"]) if x["VALOR TRANSFORMADO"] > 0 else 0,
+        axis=1)
+    consolidado["TOTAL CAJAS"] = consolidado["VALOR TRANSFORMADO"] + consolidado["UNIDADES"]
+    consolidado.rename(columns={"UNIDADES": "CAJAS", "FRACCIONES": "UNIDADES"}, inplace=True)'''
+    if "NOMBRE PDV" not in data.columns:
+        data['NOMBRE PDV']=""
+    consolidado = data[["COD TQ", "CONCATENADO"  ,"COD PRODUCTO",'COD NEG', "DESCRIPCIÓN", "COD PDV TQ","COD PDV","NOMBRE PDV","UNIDADES","FACTOR DE CONVERSION","UNIDADES DEF",	"PRECIO","TIPO","FORMATO"]]
+    return consolidado
+
 def get_consolidated_report_cadenas_su(data):
     """
     Se contruye el reporte CONSOLIDADO a partir de un conjunto de articulos del cliente.
@@ -1407,7 +1445,7 @@ def get_form_report_NOR(data, extra_data, page_client,aliado,blistea):
         
         data = data.pivot_table("UNIDADES", ["COD TQ", "FORMATO", "COD NEG", "PRECIO"], "TIPO", aggfunc={
                                 "UNIDADES": "sum"}).fillna(0).reset_index()       
-        
+        print(data.columns)
         data.rename(columns={"INV": "INVENTARIO", "VTA": "EVACUACION"}, inplace=True)
         data = data.groupby("COD TQ").agg({"PRECIO": "first", "INVENTARIO": "sum", "EVACUACION": "sum", "FORMATO": "first"}).reset_index()
     

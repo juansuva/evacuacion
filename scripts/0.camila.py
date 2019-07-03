@@ -33,14 +33,14 @@ def get_camila(orden,fecha,formatofecha):
     consolidado.drop("index", axis=1, inplace=True)
     con=consolidado
     consolidado.drop("COD NEG", axis=1, inplace=True)     
-    consolidado.to_excel("salida/CONSOLIDADO_CAMILA.xlsx")
+    consolidado.to_excel("../salida/CONSOLIDADO_CAMILA.xlsx")
     extra_data_camila = {           'ORDEN': orden, 'MES_ORDEN': fecha, 'FORMATO_FECHA': formatofecha, 'COD_PAIS': 41, 'PAIS': "41 SALVADOR",
                           'COD_CANAL': 91,'CANAL': "91 Cadenas de Droguería", 'COD_CLIPADRE': 2848, 'REF_CLIENTE': "FARMACIA CAMILA",
                           'FLAG_CUA_BAS': ""
              }
     #se obtiene reporte
     colocacion=get_form_report_NOR(con, extra_data_camila, 'FARMACIA CAMILA',0,0)
-    colocacion.to_excel("salida/reportes_camila_valorizada.xlsx")
+    colocacion.to_excel("../salida/reportes_camila_valorizada.xlsx")
     
 if len(sys.argv) >=2:
     get_camila(sys.argv[1],sys.argv[2],sys.argv[3])

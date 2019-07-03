@@ -13,13 +13,20 @@ def get_lavida(orden,fecha,formatofecha):
     ##se obtiene los datos del cliente
     da_lavida=get_data_all("0. La Vida.xlsx")
     #organiza tipod e datos la vida
+    
     da_lavida=organiza_tipo_lavida(da_lavida)    
+    
     #se limpian las unidades
     da_lavida=elimina_unidades(da_lavida)
+    
     ##sse organiza codgidos del cliente
-    data_lavida,nocode=set_tq_code_descripcion(da_lavida,"LA VIDA",'MAYORISTAS')
+   
+    data_lavida,nocode=set_tq_code_descripcion(da_lavida,"LA VIDA",'CADENAS')
+    
     #se limpian descontinuados
+    
     data_lavida=elimina_descontinuado(data_lavida)
+    
     #se obtienen puntos de cod de puntos de venta
     data_lavida=set_sellings_point_tq_code_names(data_lavida,"LA VIDA")
     #se obtiene formato concatenado y codigo de negocio
@@ -27,6 +34,7 @@ def get_lavida(orden,fecha,formatofecha):
     #se obtienen precios 
     data_lavida,no_price=set_price_nor_aliados(data_lavida,"FARMACIA LA VIDA","Lista de Precios Cadenas","CADENAS")
     #se genera consolidado
+    
     consolidado=get_consolidated_report_cadenas_su(data_lavida)
     #se organiza index y se elimina COD NEG
     consolidado.reset_index(inplace=True)
