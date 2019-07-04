@@ -8,11 +8,12 @@ Created on Thu Jun 27 08:28:07 2019
 import pandas as pd
 import sys
 from lib_process import *
+import os 
 
-
-def get_launo(orden,fecha,formatofecha):
+def get_launo(orden,fecha,formatofecha,archivo_cliente,ruta):
     ##se obtiene los datos del cliente
-    da_launo=get_data_all("0. La Uno.xlsx")
+    crea_ruta(ruta)
+    da_launo=get_data_all(archivo_cliente)
     ##sse organiza codgidos del cliente
     da_launo,nocodes,code=set_tq_codes_str(da_launo,'LA UNO','CADENAS')
     #se limpian las unidades
@@ -48,4 +49,5 @@ def get_launo(orden,fecha,formatofecha):
 if len(sys.argv) >=2:
     get_launo(sys.argv[1],sys.argv[2],sys.argv[3])
 else: 
-    get_launo(89,"Feb 2019","201902")
+    
+    get_launo(89,"Feb 2019","201902","0. La Uno.xlsx",r"C:\Users\Juan\Desktop\Data\EVACUACION_INTERNAL\Entradas")
