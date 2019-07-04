@@ -444,9 +444,19 @@ def set_tq_codes2(data, client,hoja):
     bases=base.append(base_sincod)
     
     unid=bases[bases['TIPO']=='VTA']   
-    
-    bases=bases[bases["COD TQ"] != "Descontinuado"]
-    bases=bases[(bases['UNIDADES'] !=  0)]
+    try:
+        bases=bases[bases["COD TQ"] != "Descontinuado"]
+    except:
+        bases["COD TQ"]=bases["COD TQ"].astype(str)
+        bases=bases[bases["COD TQ"] != "Descontinuado"]
+    try:    
+        bases["COD TQ"]=bases["COD TQ"].astype(np.float64)
+        bases["COD TQ"]=bases["COD TQ"].astype(np.int64)
+        bases=bases[(bases['UNIDADES'] !=  0)]
+    except:
+        bases["COD TQ"]=bases["COD TQ"].astype(str)
+        bases=bases[(bases['UNIDADES'] !=  "0")]
+        
     no_codigos = bases[pd.isnull(bases["COD TQ"])]
     
     
@@ -496,7 +506,6 @@ def set_tq_codes_onlytq(data, client):
                             
         no_codigos (List): Articulos que no tiene código TQ
     """
-    data['COD PRODUCTO'] = data['COD PRODUCTO'].astype(np.int64)
     
     data_bonima=data[data['FORMATO'] !='TQ']
     data=data[data['FORMATO']=='TQ']
@@ -509,8 +518,16 @@ def set_tq_codes_onlytq(data, client):
     no_codigos=None
     articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=client, header=0)
+    
+    
+    try:
+        data['COD PRODUCTO'] = data['COD PRODUCTO'].astype(np.int64)
+        articulos_tq_cliente['COD TQ'] = articulos_tq_cliente['COD TQ'].fillna(0).astype(np.int64)
+    except:
+        data['COD PRODUCTO'] = data['COD PRODUCTO'].astype(str)
+        articulos_tq_cliente['COD TQ'] = articulos_tq_cliente['COD TQ'].fillna(0).astype(str)
            
-    articulos_tq_cliente['COD TQ'] = articulos_tq_cliente['COD TQ'].fillna(0).astype(np.int64)
+    
     ##buscamos los articulos que no tienen codigo y agrupamos por codigo TQ y codigo de producto
     data_sincod=articulos_tq_cliente[pd.isnull(articulos_tq_cliente["COD PRODUCTO"])]
     data_sincod =data_sincod.groupby(["COD TQ"]).first().reset_index(level=0)
