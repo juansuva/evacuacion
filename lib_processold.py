@@ -2,26 +2,17 @@ import pandas as pd
 import numpy as np
 
 import os 
-
-
-
-
 ruta=os.getcwd()
-ruta=ruta+'\..\Entradas'
-
-
+from django.conf import settings
 #from django.conf import settings
 
 ##ruta dinamica para django 
-#inputPathMaestras = settings.ROUTE_INPUT_FILES
-
+inputPathMaestras = settings.ROUTE_INPUT_FILES
+ruta=ruta+'\..\Entradas'
 
 ##ruta de las entradas en esta carpeta se encuentra tanto como datos del cliente, como las maestras necesarias para la ejecucion
-inputPathMaestras = ruta
+#inputPathMaestras = ruta
 
-def crea_ruta(ruta):
-    global inputPathMaestras 
-    inputPathMaestras=ruta
 
 
 ##sele
@@ -33,15 +24,15 @@ def load_price_hist(tipo, lp_hist=lp_hist,):
     
     if  load_hist==0:
         if tipo == 1:            
-            lp_hist = pd.read_excel(os.path.join(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name="CADENAS", header=0)
+            lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name="CADENAS", header=0)
             load_hist=1
             tipo_suc=1
         elif tipo == 2:
-            lp_hist = pd.read_excel(os.path.join(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name="MAYORISTAS", header=0)
+            lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name="MAYORISTAS", header=0)
             load_hist=1
             tipo_suc=2
         elif tipo == 3:
-            lp_hist = pd.read_excel(os.path.join(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name="DEPOSITO", header=0)
+            lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name="DEPOSITO", header=0)
             load_hist=1
             tipo_suc=3
     elif tipo != tipo_suc:
@@ -100,7 +91,7 @@ def set_concatenado_municipio(data):
 
 def set_grupo(data):
     '''obtiene grupos a los que pertenecen los productos  a partie de uni el municipio y nombre de negecio'''
-    grupos=pd.read_excel(os.path.join(inputPathMaestras, "Grupo Depositos - CAM.xlsx"),
+    grupos=pd.read_excel("{}/{}".format(inputPathMaestras, "Grupo Depositos - CAM.xlsx"),
                                         sheet_name="Depositos- Salvador", header=0)
     
     grupos['CONCATENADO GRUPO']=grupos['CONCATENADO GRUPO'].str.upper().str.strip()
@@ -195,7 +186,7 @@ def organiza_cod_tq_sanjose(data,cod):
     
 ##valida los codigos tq del cliente que tenga el mismo codigo de producto y descripcion 
 def valida_codtq(data,client,hoja):
-    articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
+    articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
     
@@ -227,7 +218,7 @@ def set_tq_code_descripcion(data,client,hoja):
     '''
     c = data.columns
     no_codigos=None
-    articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
+    articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
     
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
@@ -277,7 +268,7 @@ def set_tq_code(data, client,hoja):
     """
     c = data.columns
     no_codigos=None
-    articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
+    articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
        
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]            
@@ -334,7 +325,7 @@ def set_tq_codes_str(data, client,hoja):
     
     c = data.columns
     no_codigos=None
-    articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
+    articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)
        
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]
@@ -417,7 +408,7 @@ def set_tq_codes2(data, client,hoja):
     ##cargamos muestras y buscamos las del cliente en especifico
     c = data.columns
     no_codigos=None
-    articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
+    articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=hoja, header=0)   
     
     articulos_tq_cliente=articulos_tq_cliente[articulos_tq_cliente[hoja[:-1]] == client]    
@@ -444,19 +435,9 @@ def set_tq_codes2(data, client,hoja):
     bases=base.append(base_sincod)
     
     unid=bases[bases['TIPO']=='VTA']   
-    try:
-        bases=bases[bases["COD TQ"] != "Descontinuado"]
-    except:
-        bases["COD TQ"]=bases["COD TQ"].astype(str)
-        bases=bases[bases["COD TQ"] != "Descontinuado"]
-    try:    
-        bases["COD TQ"]=bases["COD TQ"].astype(np.float64)
-        bases["COD TQ"]=bases["COD TQ"].astype(np.int64)
-        bases=bases[(bases['UNIDADES'] !=  0)]
-    except:
-        bases["COD TQ"]=bases["COD TQ"].astype(str)
-        bases=bases[(bases['UNIDADES'] !=  "0")]
-        
+    
+    bases=bases[bases["COD TQ"] != "Descontinuado"]
+    bases=bases[(bases['UNIDADES'] !=  0)]
     no_codigos = bases[pd.isnull(bases["COD TQ"])]
     
     
@@ -506,6 +487,7 @@ def set_tq_codes_onlytq(data, client):
                             
         no_codigos (List): Articulos que no tiene código TQ
     """
+    data['COD PRODUCTO'] = data['COD PRODUCTO'].astype(np.int64)
     
     data_bonima=data[data['FORMATO'] !='TQ']
     data=data[data['FORMATO']=='TQ']
@@ -516,18 +498,10 @@ def set_tq_codes_onlytq(data, client):
     ##abrimos articulos del cleinte y convertirmos en entero
     c = data.columns
     no_codigos=None
-    articulos_tq_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
+    articulos_tq_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Codigos Articulos Cliente TQ - Salvador.xlsx"),
                                         sheet_name=client, header=0)
-    
-    
-    try:
-        data['COD PRODUCTO'] = data['COD PRODUCTO'].astype(np.int64)
-        articulos_tq_cliente['COD TQ'] = articulos_tq_cliente['COD TQ'].fillna(0).astype(np.int64)
-    except:
-        data['COD PRODUCTO'] = data['COD PRODUCTO'].astype(str)
-        articulos_tq_cliente['COD TQ'] = articulos_tq_cliente['COD TQ'].fillna(0).astype(str)
            
-    
+    articulos_tq_cliente['COD TQ'] = articulos_tq_cliente['COD TQ'].fillna(0).astype(np.int64)
     ##buscamos los articulos que no tienen codigo y agrupamos por codigo TQ y codigo de producto
     data_sincod=articulos_tq_cliente[pd.isnull(articulos_tq_cliente["COD PRODUCTO"])]
     data_sincod =data_sincod.groupby(["COD TQ"]).first().reset_index(level=0)
@@ -607,7 +581,7 @@ def calculate_units_s(data,client):
     
     co=data[data['COD PRODUCTO'].str.contains('^S', regex=True)]
     ##abrimos el archivo con los factores de conversion  y agrupamos por codigo de producto
-    factor_conversion = pd.read_excel(os.path.join(inputPathMaestras, 'Factor de conversion - Salvador.xlsx'),
+    factor_conversion = pd.read_excel("{}/{}".format(inputPathMaestras, 'Factor de conversion - Salvador.xlsx'),
                                     sheet_name=client)
     
     factor_conversion = factor_conversion.groupby("COD PRODUCTO").first().reset_index(level=0)
@@ -665,7 +639,7 @@ def calculate_units(data, client):
         no_factor (DataFrame): Conjunto de artículos a los que no se les halló un factor
     """
     # Lectura del archivo de factor de conversion
-    factor_conversion = pd.read_excel(os.path.join(inputPathMaestras, 'Factor de conversion El Salvador.xlsx'),
+    factor_conversion = pd.read_excel("{}/{}".format(inputPathMaestras, 'Factor de conversion El Salvador.xlsx'),
                                     sheet_name=client)
     factor_conversion = factor_conversion.groupby("CODIGO").first().reset_index(level=0)
     factor_conversion.drop("DESCRIPCION", axis=1, inplace=True)
@@ -713,7 +687,7 @@ def set_sellings_point_tq_code(data, client):
     
     data.drop("NOMBRE PDV", axis=1, inplace=True)
     # Lectura de la maestra de codigos de ventas
-    puntos_venta = pd.read_excel(os.path.join(inputPathMaestras, 'Codigos PDV Cliente TQ - Salvador.xlsx'),
+    puntos_venta = pd.read_excel("{}/{}".format(inputPathMaestras, 'Codigos PDV Cliente TQ - Salvador.xlsx'),
                                 sheet_name=client)
     #puntos_venta.rename(columns = { 'COD TQ': 'PDV TQ', 'NOMBRE QUE REPORTA EL CLIENTE': 'PDV' }, inplace = True)
     #puntos_venta.drop("FORMATO", axis=1, inplace=True)    
@@ -763,7 +737,7 @@ def set_sellings_point_tq_code_names(data, client):
     
     #data.drop("NOMBRE PDV", axis=1, inplace=True)
     # Lectura de la maestra de codigos de ventas
-    puntos_venta = pd.read_excel(os.path.join(inputPathMaestras, 'Codigos PDV Cliente TQ - Salvador.xlsx'),
+    puntos_venta = pd.read_excel("{}/{}".format(inputPathMaestras, 'Codigos PDV Cliente TQ - Salvador.xlsx'),
                                 sheet_name=client)
     #puntos_venta.rename(columns = { 'COD TQ': 'PDV TQ', 'NOMBRE QUE REPORTA EL CLIENTE': 'PDV' }, inplace = True)
     #puntos_venta.drop("FORMATO", axis=1, inplace=True)    
@@ -813,7 +787,7 @@ def set_cod_neg(data, region):
     if  'COD NEG' in data.columns:
         data.drop("COD NEG", axis=1, inplace=True)
     # Cargue de la maestra de artículos y selección de columnas.
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                             sheet_name=region, skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos.loc[:, ['COD TQ', 'COD NEG']]    
     # Se cerciora que los tipo de datos sean correctos
@@ -845,7 +819,7 @@ def set_concatenated_and_format(data, region):
     if  'FORMATO' in data.columns:
         data.drop("FORMATO", axis=1, inplace=True)
     # Cargue de la maestra de artículos y selección de columnas.
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                             sheet_name=region, skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos.loc[:, ['COD TQ', 'CONCATENADO','COD NEG', 'FORMATO']]    
     # Se cerciora que los tipo de datos sean correctos
@@ -877,7 +851,7 @@ def set_format(data, region):
     if  'FORMATO' in data.columns:
         data.drop("FORMATO", axis=1, inplace=True)
     # Cargue de la maestra de artículos y selección de columnas.
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                             sheet_name=region, skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos.loc[:, ['COD TQ', 'FORMATO']]    
     # Se cerciora que los tipo de datos sean correctos
@@ -921,7 +895,7 @@ def set_price_hist(data,client,hoja):
                                 el precio.
     """
     ##abrimos el archivo apartir del la hoja, y renombramos columns organizamos el mes y filtramos los datos del cliente 
-    lp_hist = pd.read_excel(os.path.join(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name=hoja, header=0)   
+    lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista de Precios historico - Salvador.xlsx"),sheet_name=hoja, header=0)   
     lp_hist.rename(columns = { 'CIF NETO': 'PRECIO' }, inplace = True)
     lp_hist.MES=lp_hist.MES.str.strip().str.upper().str.replace('. ', '')
     lp_hist2=lp_hist[lp_hist['NOMBRE CLIENTE'] == client]
@@ -991,7 +965,7 @@ def set_price_nor(data,ref_cliente,pertenencia_nor,pertenencia):
     bases_nor=data[(data["COD NEG"] == 7) | (data["COD NEG"] == 82) ]
     data_precios_nor=pd.read_excel("{}\{}".format(inputPathMaestras, "Lista de Precios MK-NOR - Salvador.xlsx"), sheet_name=pertenencia_nor, header=0)
     data_precios=pd.read_excel("{}\{}".format(inputPathMaestras, "Lista Precios - Salvador.xlsx"), sheet_name=pertenencia, header=0)
-    #lp_hist = pd.read_excel(os.path.join(inputPathMaestras, ruta_maestra),sheet_name=hoja, header=0)
+    #lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, ruta_maestra),sheet_name=hoja, header=0)
     
     
     data_precios2=data_precios_nor.loc[:,['COD TQ','PRECIO']]
@@ -1070,7 +1044,7 @@ def set_price_nor_aliados(data,ref_cliente,pertenencia_nor,pertenencia):
     data_precios_nor=pd.read_excel("{}\{}".format(inputPathMaestras, "Lista de Precios MK-NOR - Salvador.xlsx"), sheet_name=pertenencia_nor, header=0)
     data_precios_aliados=pd.read_excel("{}\{}".format(inputPathMaestras, "Lista Precios - Salvador.xlsx"), sheet_name="CADENAS ALIADAS", header=0)
     data_precios=pd.read_excel("{}\{}".format(inputPathMaestras, "Lista Precios - Salvador.xlsx"), sheet_name=pertenencia, header=0)
-    #lp_hist = pd.read_excel(os.path.join(inputPathMaestras, ruta_maestra),sheet_name=hoja, header=0)
+    #lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, ruta_maestra),sheet_name=hoja, header=0)
     
     
     ##buscamos precios en lista de aliados
@@ -1152,16 +1126,16 @@ def set_price(data, page_client, class_client, client,hoja):
     """
 
     # Listado de precios del cliente
-    lp_cliente = pd.read_excel(os.path.join(inputPathMaestras, "Lista Precios Salvador Triim IV-2018.xlsx"),
+    lp_cliente = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista Precios Salvador Triim IV-2018.xlsx"),
                             sheet_name=page_client, header=4)
     lp_cliente.drop("Unnamed: 0", axis=1, inplace=True)
 
     # Listado de precios de la clase a la que pertenece el cliente
-    lp_clase = pd.read_excel(os.path.join(inputPathMaestras, "Lista Precios Salvador Triim IV-2018.xlsx"),
+    lp_clase = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista Precios Salvador Triim IV-2018.xlsx"),
                             sheet_name=class_client, header=3)
 
     # Listado historico
-    lp_hist = pd.read_excel(os.path.join(inputPathMaestras, "Lista de Precios MK-NOR - Salvador.xlsx"),
+    lp_hist = pd.read_excel("{}/{}".format(inputPathMaestras, "Lista de Precios MK-NOR - Salvador.xlsx"),
                             sheet_name=hoja, header=1)
     # Se elimina los duplicados dejando los mas recientes del cliente
     lp_hist = lp_hist[lp_hist["NOMBRE CLIENTE"].str.contains(client, case=False)].sort_values(
@@ -1360,7 +1334,7 @@ def get_form_report(data, extra_data, page_client):
     data["INVENTARIO VALORES"] = data["PRECIO"] * data["INVENTARIO"]
     
     # Lectura del archivo de ventas e inventario
-    venta_inv = pd.read_excel(os.path.join(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
+    venta_inv = pd.read_excel("{}/{}".format(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
                             sheet_name="Venta e Inventario Salvador", skiprows=2)
     venta_inventario = venta_inv.loc[:, ['Articulo', 'Mes', 'Canal', 'Cliente Padre', 'Cliente', 'Unidades vta comer' ,'Valor des com']]
     # Se modifica los tipos de datos en los campos a tratar
@@ -1404,7 +1378,7 @@ def get_form_report(data, extra_data, page_client):
     #resto["FORMATO"] = resto.apply(lambda x: "BONIMA" if x["COD TQ"].startswith("300") else "TQ", axis=1)
     ## Se juntan los sobrantes al resto de artículos
     data = data.append(resto)
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                         sheet_name='MAESTRA EL SALVADOR', skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos[['COD TQ', 'NOMBRE TQ', 'PRESENTACIÓN', 'COD NEG', 'NOMBRE NEG', 'COD LIN', 'NOMBRE LIN', 'COD MARCA',
                                                    'NOMBRE MARCA', 'Art Vigentes', 'Flag Seg Marca', 'Flag Prod Foco TG NOR', 'Flag Incentivos',
@@ -1492,7 +1466,7 @@ def get_form_report_NOR(data, extra_data, page_client,aliado,blistea):
         
     
     # Lectura del archivo de ventas e inventario
-    venta_inv = pd.read_excel(os.path.join(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
+    venta_inv = pd.read_excel("{}/{}".format(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
                             sheet_name="Venta e Inventario Salvador", skiprows=2)
     venta_inventario = venta_inv.loc[:, ['Articulo', 'Mes', 'Canal', 'Cliente Padre', 'Cliente', 'Unidades vta comer' ,'Valor des com']]
     # Se modifica los tipos de datos en los campos a tratar
@@ -1543,7 +1517,7 @@ def get_form_report_NOR(data, extra_data, page_client,aliado,blistea):
     data = data.append(resto).fillna(0)
     
     data.drop("COD NEG", axis=1, inplace=True)
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                         sheet_name='MAESTRA EL SALVADOR', skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos[['COD TQ', 'NOMBRE TQ', 'PRESENTACIÓN', 'COD NEG', 'NOMBRE NEG', 'COD LIN', 'NOMBRE LIN', 'COD MARCA',
                                                    'NOMBRE MARCA', 'Art Vigentes', 'Flag Seg Marca', 'Flag Prod Foco TG NOR', 'Flag Incentivos',
@@ -1630,7 +1604,7 @@ def get_form_report_NOR_depositos(data, extra_data, page_client,aliado,blistea):
         
     
     # Lectura del archivo de ventas e inventario
-    venta_inv = pd.read_excel(os.path.join(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
+    venta_inv = pd.read_excel("{}/{}".format(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
                             sheet_name="Venta e Inventario Salvador", skiprows=2)
     venta_inventario = venta_inv.loc[:, ['Articulo', 'Mes', 'Canal', 'Cliente Padre', 'Cliente', 'Unidades vta comer' ,'Valor des com']]
     # Se modifica los tipos de datos en los campos a tratar
@@ -1681,7 +1655,7 @@ def get_form_report_NOR_depositos(data, extra_data, page_client,aliado,blistea):
     data = data.append(resto).fillna(0)
     
     data.drop("COD NEG", axis=1, inplace=True)
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                         sheet_name='MAESTRA EL SALVADOR', skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos[['COD TQ', 'NOMBRE TQ', 'PRESENTACIÓN', 'COD NEG', 'NOMBRE NEG', 'COD LIN', 'NOMBRE LIN', 'COD MARCA',
                                                    'NOMBRE MARCA', 'Art Vigentes', 'Flag Seg Marca', 'Flag Prod Foco TG NOR', 'Flag Incentivos',
@@ -1786,7 +1760,7 @@ def get_form_report_3_nor_depositos(data, extra_data,blistea):
    
     if "COD NEG" in data.columns:
         data.drop("COD NEG", axis=1, inplace=True)
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                         sheet_name='MAESTRA EL SALVADOR', skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos[['COD TQ', 'NOMBRE TQ', 'PRESENTACIÓN', 'COD NEG', 'NOMBRE NEG', 'COD LIN', 'NOMBRE LIN', 'COD MARCA',
                                                    'NOMBRE MARCA', 'Art Vigentes', 'Flag Seg Marca', 'Flag Prod Foco TG NOR', 'Flag Incentivos',
@@ -1865,7 +1839,7 @@ def get_form_report_mayorista(data, extra_data, page_client,aliado,blistea):
     data["INVENTARIO VALORES"] = data["PRECIO"] * data["INVENTARIO"]
     
     # Lectura del archivo de ventas e inventario
-    venta_inv = pd.read_excel(os.path.join(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
+    venta_inv = pd.read_excel("{}/{}".format(inputPathMaestras, "Venta e Inventario Salvador.xlsx"),
                             sheet_name="Venta e Inventario Salvador", skiprows=2)
     venta_inventario = venta_inv.loc[:, ['Articulo', 'Mes', 'Canal', 'Cliente Padre', 'Cliente', 'Unidades vta comer' ,'Valor des com']]
     # Se modifica los tipos de datos en los campos a tratar
@@ -1925,7 +1899,7 @@ def get_form_report_mayorista(data, extra_data, page_client,aliado,blistea):
     
     data = data.append(resto)
     
-    maestra_cam_articulos = pd.read_excel(os.path.join(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
+    maestra_cam_articulos = pd.read_excel("{}/{}".format(inputPathMaestras, 'Maestra Articulos CAM.xlsx'),
                                         sheet_name='MAESTRA EL SALVADOR', skiprows=2)
     maestra_cam_articulos = maestra_cam_articulos[['COD TQ', 'NOMBRE TQ', 'PRESENTACIÓN', 'NOMBRE NEG', 'COD LIN', 'NOMBRE LIN', 'COD MARCA',
                                                    'NOMBRE MARCA', 'Art Vigentes', 'Flag Seg Marca', 'Flag Prod Foco TG NOR', 'Flag Incentivos',
@@ -1995,3 +1969,88 @@ def writeFile(list_data, filename):
 
 class EvacuacionError(Exception):
     pass
+
+def findPrices(cliente, data, maestra_articulos = None):
+    """
+    Funcion que determina el precio de los articulos
+
+    Parameters:
+        cliente (str): Nombre del cliente
+        data (DataFrame): Dataframe con la informacion del cliente
+
+    Returns:
+        output (DataFrame): Dataframe del cliente con la columna de precio
+        error (str): Mensaje de error
+    """
+    if maestra_articulos is not None:
+        data = pd.merge(data, maestra_articulos, how="left", on="COD TQ")
+
+    switcher = {
+        "san_nicolas": {
+            "mknor": ["Lista de Precios Fasani", "Lista de Precios Cadenas"],
+            "cadenas": ["CADENAS"],
+            "clipadre": 2850,
+        },
+        "farmavalue": {
+            "mknor": ["Lista de Precios Farmavalue", "Lista de Precios Cadenas"],
+            "cadenas": ["CADENAS"],
+            "clipadre": 2845,
+        },
+        "san_benito": {
+            "mknor": ["Lista de Precios Cadenas"],
+            "cadenas": ["CADENAS"],
+            "clipadre": 9005,
+        },
+        "brasil": {
+            "mknor": ["Lista de Precios Brasil", "Lista de Precios Cadenas"],
+            "cadenas": ["CADENAS ALIADAS", "CADENAS"],
+            "clipadre": 2842,
+        },
+    }
+    option = switcher[cliente]
+    list_precios_mknor = pd.DataFrame()
+    try:
+        for mknor in option["mknor"]:
+            list_precios_mknor = pd.concat([list_precios_mknor, pd.read_excel("{}\{}".format(settings.ROUTE_INPUT_FILES, "Lista de precios MK-NOR - Salvador.xlsx"), sheet_name=mknor)], sort=False)
+        list_precios_mknor = list_precios_mknor.groupby(['COD TQ']).first().reset_index()
+        list_precios_mknor['COD TQ'] = list_precios_mknor['COD TQ'].astype(str)
+    
+        list_precios_salvador_cadenas = pd.DataFrame()
+        for cadena in option["cadenas"]:
+            list_precios_salvador_cadenas = pd.concat([list_precios_salvador_cadenas, pd.read_excel("{}\{}".format(settings.ROUTE_INPUT_FILES, "Lista Precios - Salvador.xlsx"), sheet_name=cadena)], sort=False)
+        list_precios_salvador_cadenas = list_precios_salvador_cadenas.groupby(['COD TQ']).first().reset_index()
+        list_precios_salvador_cadenas['COD TQ'] = list_precios_salvador_cadenas['COD TQ'].astype(str)
+        
+        cliente_neg_7_82 = data[data["COD NEG"].isin([7, 82])].merge(list_precios_mknor[["COD TQ", "PRECIO"]], how="left", on="COD TQ")
+        del list_precios_mknor
+        cliente_neg_no_7_82 = data[~data["COD NEG"].isin([7, 82])].merge(list_precios_salvador_cadenas[["COD TQ", "PRECIO"]], how="left", on="COD TQ")
+        del list_precios_salvador_cadenas
+        
+        output = pd.concat([cliente_neg_7_82, cliente_neg_no_7_82], sort=True)
+        del cliente_neg_7_82
+        del cliente_neg_no_7_82
+        
+        if len(output[output["PRECIO"].isna()]) > 0:
+            list_precios_salvador_cadenas_hist = pd.read_excel("{}\{}".format(settings.ROUTE_INPUT_FILES, "Lista de Precios historico - Salvador.xlsx"), sheet_name="CADENAS")
+            list_precios_salvador_cadenas_hist['COD CLIPADRE'] = list_precios_salvador_cadenas_hist['COD CLIPADRE'].astype('int64')
+            list_precios_salvador_cadenas_hist = list_precios_salvador_cadenas_hist[list_precios_salvador_cadenas_hist["COD CLIPADRE"] == option['clipadre']]
+            #list_precios_salvador_cadenas_hist = list_precios_salvador_cadenas_hist[list_precios_salvador_cadenas_hist["MES"] == periodo]
+            list_precios_salvador_cadenas_hist = list_precios_salvador_cadenas_hist.groupby(['COD TQ']).first().reset_index()
+            list_precios_salvador_cadenas_hist['COD TQ'] = list_precios_salvador_cadenas_hist['COD TQ'].astype(str)
+            output_precio = output[~output["PRECIO"].isna()]
+            output_no_precio = output[output["PRECIO"].isna()].drop(['PRECIO'], axis=1)
+            output_no_precio = output_no_precio.merge(list_precios_salvador_cadenas_hist[["COD TQ", "PRECIO"]], how="left", on="COD TQ")
+            del list_precios_salvador_cadenas_hist
+            output = pd.concat([output_precio, output_no_precio], sort=True)
+            del output_precio
+            del output_no_precio
+    
+        output["PRECIO"].fillna(0, inplace=True)
+        output.rename(columns={"PRECIO": "Precio Neto"}, inplace=True)
+        
+        return output
+    except Exception as e:
+        error = str(e)
+        print('Salio error')
+        print(error)
+        return error

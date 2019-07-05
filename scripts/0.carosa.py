@@ -18,7 +18,7 @@ def crea_periodo(date):
     '''crea el periodo para que pueda encontrar los datos en las maestras,
     el formato ingresado debe ser el siguiente '2019-04-01'    '''
     periodo = datetime.datetime.strptime(date, '%Y-%m-%d')
-    arg1 = "{0} {1}".format(settings.MESES[periodo.strftime('%b')], periodo.strftime('%y'))
+    arg1 = "{0} {1}".format(settings.MESES[periodo.strftime('%b')], periodo.strftime('%Y'))
     arg2 = "{0}{1}".format(periodo.strftime('%Y'), periodo.strftime('%m'))
     return arg1, arg2
 
